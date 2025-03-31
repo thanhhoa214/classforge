@@ -1,0 +1,65 @@
+// schema.prisma
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+model User {
+  id          String   @id @default(cuid())
+  name        String?
+  email       String   @unique
+  password    String
+  role        Role     @default(USER)
+  institution String?
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+}
+
+model Student {
+  id             String     @id @default(cuid())
+  name           String
+  email          String     @unique
+  grade          String
+  performance    Float?
+  networkMetrics Json?
+  createdAt      DateTime   @default(now())
+  updatedAt      DateTime   @updatedAt
+  Classroom      Classroom? @relation(fields: [classroomId], references: [id])
+  classroomId    String?
+}
+
+model Classroom {
+  id        String    @id @default(cuid())
+  name      String
+  capacity  Int
+  students  Student[]
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+}
+
+model Network {
+  id        String      @id @default(cuid())
+  type      NetworkType
+  sourceId  String
+  targetId  String
+  weight    Float?
+  createdAt DateTime    @default(now())
+  updatedAt DateTime    @updatedAt
+}
+
+enum Role {
+  ADMIN
+  TEACHER
+  USER
+}
+
+enum NetworkType {
+  FRIENDSHIP
+  ADVICE
+  INFLUENCE
+  DISRESPECT
+}
