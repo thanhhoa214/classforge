@@ -9,7 +9,7 @@ export default function AllocationsPage() {
   const [result, setResult] = useState<AllocationResult | null>(null);
 
   return (
-    <div className="container py-8">
+    <div>
       <div className="mb-8">
         <h1 className="text-3xl font-bold">Classroom Allocation Generator</h1>
         <p className="text-muted-foreground mt-2">

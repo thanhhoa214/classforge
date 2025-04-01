@@ -7,7 +7,7 @@ import { Plus } from "lucide-react";
 
 export default function StudentsPage() {
   return (
-    <div className="container mx-auto py-10">
+    <div>
       <div className="flex justify-between items-center mb-8">
         <h1 className="text-3xl font-bold">Student Management</h1>
         <div className="flex gap-4">
@@ -18,11 +18,9 @@ export default function StudentsPage() {
           </Button>
         </div>
       </div>
-
-      <div className="mb-6">
+      <div className="mb-4">
         <StudentFilters />
       </div>
-
       <Suspense fallback={<div>Loading students...</div>}>
         <StudentDataTable />
       </Suspense>

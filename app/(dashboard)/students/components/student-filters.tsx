@@ -13,7 +13,7 @@ import { Button } from "@/components/ui/button";
 import { StudentFilters as StudentFiltersType } from "@/app/types/student";
 
 interface StudentFiltersProps {
-  onFilterChange: (filters: StudentFiltersType) => void;
+  onFilterChange?: (filters: StudentFiltersType) => void;
 }
 
 export function StudentFilters({ onFilterChange }: StudentFiltersProps) {
@@ -26,7 +26,7 @@ export function StudentFilters({ onFilterChange }: StudentFiltersProps) {
   const handleFilterChange = (newFilters: Partial<StudentFiltersType>) => {
     const updatedFilters = { ...filters, ...newFilters };
     setFilters(updatedFilters);
-    onFilterChange(updatedFilters);
+    onFilterChange?.(updatedFilters);
   };
 
   return (
@@ -62,7 +62,7 @@ export function StudentFilters({ onFilterChange }: StudentFiltersProps) {
             performanceRange: undefined,
           };
           setFilters(clearedFilters);
-          onFilterChange(clearedFilters);
+          onFilterChange?.(clearedFilters);
         }}
       >
         Clear Filters
