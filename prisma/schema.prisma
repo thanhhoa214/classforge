@@ -17,6 +17,7 @@ model User {
   institution String?
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
+  Preset      Preset[]
 }
 
 model Student {
@@ -41,14 +42,37 @@ model Classroom {
   updatedAt DateTime  @updatedAt
 }
 
+model Preset {
+  id          String       @id @default(cuid())
+  name        String
+  config      Json
+  createdAt   DateTime     @default(now())
+  updatedAt   DateTime     @updatedAt
+  userId      String
+  user        User         @relation(fields: [userId], references: [id])
+  allocations Allocation[]
+}
+
+model Allocation {
+  id        String    @id @default(cuid())
+  presetId  String
+  preset    Preset    @relation(fields: [presetId], references: [id])
+  result    Json
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+  Network   Network[]
+}
+
 model Network {
-  id        String      @id @default(cuid())
-  type      NetworkType
-  sourceId  String
-  targetId  String
-  weight    Float?
-  createdAt DateTime    @default(now())
-  updatedAt DateTime    @updatedAt
+  id           String      @id @default(cuid())
+  type         NetworkType
+  sourceId     String
+  targetId     String
+  weight       Float?
+  createdAt    DateTime    @default(now())
+  updatedAt    DateTime    @updatedAt
+  allocationId String?
+  allocation   Allocation? @relation(fields: [allocationId], references: [id])
 }
 
 enum Role {

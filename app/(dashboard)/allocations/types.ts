@@ -1,80 +1,103 @@
 import { z } from "zod";
 
-export const AlgorithmType = {
-  GNN: "gnn",
-  RL: "rl",
-} as const;
+export enum AlgorithmType {
+  GNN = "GNN",
+  KMEANS = "KMEANS",
+  RANDOM = "RANDOM",
+}
 
-export type AlgorithmType = (typeof AlgorithmType)[keyof typeof AlgorithmType];
+export enum PriorityType {
+  ACADEMIC_PERFORMANCE = "ACADEMIC_PERFORMANCE",
+  SOCIAL_CONNECTIONS = "SOCIAL_CONNECTIONS",
+  BEHAVIORAL_METRICS = "BEHAVIORAL_METRICS",
+  LEARNING_STYLE = "LEARNING_STYLE",
+  SPECIAL_NEEDS = "SPECIAL_NEEDS",
+}
 
-export const PriorityType = {
-  ACADEMIC: "academic",
-  FRIENDSHIP: "friendship",
-  ADVICE: "advice",
-  INFLUENCE: "influence",
-  DISRESPECT: "disrespect",
-} as const;
+export interface Priority {
+  id: string;
+  name: string;
+  type: PriorityType;
+  weight: number;
+  order: number;
+}
 
-export type PriorityType = (typeof PriorityType)[keyof typeof PriorityType];
+export interface AllocationConfig {
+  algorithm: AlgorithmType;
+  parameters: {
+    learningRate?: number;
+    epochs?: number;
+    batchSize?: number;
+    nClusters?: number;
+  };
+  priorities: Priority[];
+  constraints: Array<{
+    type: "REQUIRED" | "FORBIDDEN";
+    student1Id: string;
+    student2Id: string;
+  }>;
+}
+
+export interface AllocationResult {
+  classrooms: Array<{
+    id: string;
+    name: string;
+    students: Array<{
+      id: string;
+      name: string;
+      metrics: {
+        academicPerformance: number;
+        socialConnections: number;
+        behavioralMetrics: number;
+        learningStyle: number;
+        specialNeeds: number;
+      };
+    }>;
+  }>;
+  metrics: {
+    overallScore: number;
+    academicBalance: number;
+    socialBalance: number;
+    constraintSatisfaction: number;
+  };
+}
+
+export interface Preset {
+  id: string;
+  name: string;
+  config: AllocationConfig;
+  createdAt: Date;
+  updatedAt: Date;
+}
 
 export const PrioritySchema = z.object({
   id: z.string(),
   name: z.string(),
   type: z.nativeEnum(PriorityType),
   weight: z.number().min(0).max(1),
-  order: z.number(),
-});
-
-export const PresetSchema = z.object({
-  id: z.string(),
-  name: z.string(),
-  config: z.object({
-    algorithm: z.nativeEnum(AlgorithmType),
-    parameters: z.record(z.number()),
-    priorities: z.array(PrioritySchema),
-    constraints: z.array(
-      z.object({
-        type: z.enum(["required", "forbidden"]),
-        studentIds: z.array(z.string()),
-      })
-    ),
-  }),
-  createdAt: z.date(),
-  updatedAt: z.date(),
+  order: z.number().int().min(0),
 });
 
 export const AllocationConfigSchema = z.object({
   algorithm: z.nativeEnum(AlgorithmType),
-  parameters: z.record(z.number()),
+  parameters: z.object({
+    learningRate: z.number().optional(),
+    epochs: z.number().optional(),
+    batchSize: z.number().optional(),
+    nClusters: z.number().optional(),
+  }),
   priorities: z.array(PrioritySchema),
   constraints: z.array(
     z.object({
-      type: z.enum(["required", "forbidden"]),
-      studentIds: z.array(z.string()),
+      type: z.enum(["REQUIRED", "FORBIDDEN"]),
+      student1Id: z.string(),
+      student2Id: z.string(),
     })
   ),
 });
 
-export type AllocationConfig = z.infer<typeof AllocationConfigSchema>;
-export type Priority = z.infer<typeof PrioritySchema>;
-export type Preset = z.infer<typeof PresetSchema>;
-export type Constraint = z.infer<
+export type AllocationConfigType = z.infer<typeof AllocationConfigSchema>;
+export type PrioritySchemaType = z.infer<typeof PrioritySchema>;
+export type ConstraintType = z.infer<
   typeof AllocationConfigSchema
 >["constraints"][number];
-
-export interface AllocationResult {
-  id: string;
-  config: AllocationConfig;
-  classrooms: Array<{
-    id: string;
-    name: string;
-    students: string[];
-  }>;
-  metrics: {
-    isolationScore: number;
-    connectionDensity: number;
-    balanceScore: number;
-    computationTime: number;
-  };
-  createdAt: Date;
-}
