@@ -74,7 +74,8 @@ export function Sidenav() {
   const pathname = usePathname();
   const [isCollapsed, setIsCollapsed] = useLocalStorage<boolean>(
     "cf.sidenav_collapsed",
-    false
+    false,
+    { initializeWithValue: false }
   );
 
   return (

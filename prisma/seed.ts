@@ -101,12 +101,7 @@ async function main() {
       const weight = Math.random();
 
       return prisma.network.create({
-        data: {
-          type,
-          sourceId,
-          targetId,
-          weight,
-        },
+        data: { type, sourceId, targetId, weight },
       });
     })
   );
