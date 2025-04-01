@@ -170,48 +170,10 @@ Save/load configuration controls
 
 BE Functionality:
 
-Algorithm execution endpoints for different methods (GNN, RL)
-Parameter validation services
-Constraint processing system
+Priority Ordering for criteria (reorderable based on the priority)
 Allocation generation with performance metrics
 Configuration persistence API
-
-5. Classroom Management & Manual Override Page
-   UI Elements:
-
-Split-screen layout with classrooms on both sides
-Drag-and-drop interface for student reassignment
-Real-time feedback panel showing impact of changes
-Student cards with key metrics and relationship indicators
-Classroom balance visualization with metrics
-Undo/redo functionality for changes
-Comparison view between original and modified allocations
-
-BE Functionality:
-
-Real-time impact calculation services for student movements
-Allocation persistence and versioning
-Optimization suggestion engine
-Classroom metrics calculation endpoints
-
-6. Reports & Analytics Page
-   UI Elements:
-
-Report template selection interface
-Interactive data visualization components
-Before/after comparison sliders
-Custom report builder with drag-and-drop elements
-Export controls with format selection
-Scheduled report configuration
-Data filtering and time-range selection
-
-BE Functionality:
-
-Report generation services
-Data aggregation and analysis endpoints
-Export functionality for multiple formats
-Historical data access APIs
-Scheduled report management
+Save a preset & list presets
 
 7. Settings & Configuration Page
    UI Elements:

@@ -14,7 +14,7 @@ export default async function NetworkPage({
   const data = await getNetworkData(type);
 
   return (
-    <div className="container mx-auto p-4 h-screen flex flex-col">
+    <>
       <h1 className="text-2xl font-bold mb-4">Social Network Analysis</h1>
       <div className="mb-4">
         <NetworkTypeSelector currentType={type} />
@@ -24,6 +24,6 @@ export default async function NetworkPage({
           <NetworkVisualization data={data} />
         </Suspense>
       </div>
-    </div>
+    </>
   );
 }

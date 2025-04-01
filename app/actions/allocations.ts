@@ -6,7 +6,7 @@ import {
   AllocationConfigSchema,
   type AllocationResult,
   PresetSchema,
-} from "./types";
+} from "../(dashboard)/allocations/types";
 
 export async function generateAllocation(
   config: z.infer<typeof AllocationConfigSchema>

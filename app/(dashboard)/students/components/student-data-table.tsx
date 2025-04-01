@@ -1,6 +1,3 @@
-"use client";
-
-import { useState } from "react";
 import {
   Table,
   TableBody,
@@ -9,57 +6,95 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import { useStudents } from "@/app/hooks/use-students";
-import { Button } from "@/components/ui/button";
-import { Trash2, Edit } from "lucide-react";
-import { StudentFilters } from "@/app/types/student";
-import { useToast } from "@/components/ui/use-toast";
+import { StudentFilters } from "@/app/(dashboard)/students/student";
+import { getStudents } from "../../../actions/students";
+import { StudentActions } from "./student-actions";
+import {
+  Pagination,
+  PaginationContent,
+  PaginationEllipsis,
+  PaginationItem,
+  PaginationLink,
+  PaginationNext,
+  PaginationPrevious,
+} from "@/components/ui/pagination";
 
-export function StudentDataTable() {
-  const {
-    students,
-    loading,
-    error,
-    total,
-    page,
-    totalPages,
-    fetchStudents,
-    deleteStudent,
-  } = useStudents();
+interface StudentDataTableProps {
+  filters?: StudentFilters;
+  page?: number;
+}
 
-  const { toast } = useToast();
-  const [filters, setFilters] = useState<StudentFilters>({});
+export async function StudentDataTable({
+  filters = {},
+  page = 1,
+}: StudentDataTableProps) {
+  const { students, totalPages, currentPage } = await getStudents(
+    filters,
+    page
+  );
+  const renderPageNumbers = () => {
+    const pages = [];
+    const maxPagesToShow = 5; // Adjust as needed
 
-  const handleFilterChange = (newFilters: StudentFilters) => {
-    setFilters(newFilters);
-    fetchStudents(newFilters, 1);
-  };
+    if (totalPages <= maxPagesToShow) {
+      for (let i = 1; i <= totalPages; i++) {
+        pages.push(
+          <PaginationItem key={i}>
+            <PaginationLink href={`?page=${i}`} isActive={i === currentPage}>
+              {i}
+            </PaginationLink>
+          </PaginationItem>
+        );
+      }
+    } else {
+      if (currentPage > 2) {
+        pages.push(
+          <PaginationItem key={1}>
+            <PaginationLink href="?page=1">1</PaginationLink>
+          </PaginationItem>
+        );
+      }
+      if (currentPage > 3) {
+        pages.push(
+          <PaginationItem key="ellipsis-prev">
+            <PaginationEllipsis />
+          </PaginationItem>
+        );
+      }
 
-  const handleDelete = async (id: string) => {
-    if (window.confirm("Are you sure you want to delete this student?")) {
-      try {
-        await deleteStudent(id);
-        toast({
-          title: "Success",
-          description: "Student deleted successfully",
-        });
-      } catch (error) {
-        toast({
-          variant: "destructive",
-          title: "Error",
-          description: "Failed to delete student",
-        });
+      const startPage = Math.max(2, currentPage - 1);
+      const endPage = Math.min(totalPages - 1, currentPage + 1);
+
+      for (let i = startPage; i <= endPage; i++) {
+        pages.push(
+          <PaginationItem key={i}>
+            <PaginationLink href={`?page=${i}`} isActive={i === currentPage}>
+              {i}
+            </PaginationLink>
+          </PaginationItem>
+        );
+      }
+
+      if (currentPage < totalPages - 2) {
+        pages.push(
+          <PaginationItem key="ellipsis-next">
+            <PaginationEllipsis />
+          </PaginationItem>
+        );
+      }
+      if (currentPage < totalPages - 1) {
+        pages.push(
+          <PaginationItem key={totalPages}>
+            <PaginationLink href={`?page=${totalPages}`}>
+              {totalPages}
+            </PaginationLink>
+          </PaginationItem>
+        );
       }
     }
+
+    return pages;
   };
-
-  if (loading) {
-    return <div>Loading...</div>;
-  }
-
-  if (error) {
-    return <div>Error: {error}</div>;
-  }
 
   return (
     <div className="space-y-4">
@@ -84,44 +119,46 @@ export function StudentDataTable() {
                   {student.performance?.toFixed(1) ?? "N/A"}
                 </TableCell>
                 <TableCell>
-                  <div className="flex gap-2">
-                    <Button variant="ghost" size="icon">
-                      <Edit className="h-4 w-4" />
-                    </Button>
-                    <Button
-                      variant="ghost"
-                      size="icon"
-                      onClick={() => handleDelete(student.id!)}
-                    >
-                      <Trash2 className="h-4 w-4" />
-                    </Button>
-                  </div>
+                  <StudentActions student={student} />
                 </TableCell>
               </TableRow>
             ))}
           </TableBody>
         </Table>
       </div>
+
       <div className="flex justify-between items-center">
-        <div>
-          Total: {total} students | Page {page} of {totalPages}
-        </div>
-        <div className="flex gap-2">
-          <Button
-            variant="outline"
-            onClick={() => fetchStudents(filters, page - 1)}
-            disabled={page === 1}
-          >
-            Previous
-          </Button>
-          <Button
-            variant="outline"
-            onClick={() => fetchStudents(filters, page + 1)}
-            disabled={page === totalPages}
-          >
-            Next
-          </Button>
-        </div>
+        <Pagination>
+          <PaginationContent>
+            <PaginationItem>
+              <PaginationPrevious
+                href={currentPage > 1 ? `?page=${currentPage - 1}` : "#"}
+                aria-disabled={currentPage === 1}
+                className={
+                  currentPage === 1
+                    ? "text-muted-foreground pointer-events-none"
+                    : ""
+                }
+              />
+            </PaginationItem>
+
+            {renderPageNumbers()}
+
+            <PaginationItem>
+              <PaginationNext
+                href={
+                  currentPage < totalPages ? `?page=${currentPage + 1}` : "#"
+                }
+                aria-disabled={currentPage === totalPages}
+                className={
+                  currentPage === totalPages
+                    ? "text-muted-foreground pointer-events-none"
+                    : ""
+                }
+              />
+            </PaginationItem>
+          </PaginationContent>
+        </Pagination>
       </div>
     </div>
   );

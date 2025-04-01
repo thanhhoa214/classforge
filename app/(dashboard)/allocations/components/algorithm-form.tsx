@@ -46,7 +46,7 @@ import {
   savePreset,
   loadPresets,
   deletePreset,
-} from "../actions";
+} from "../../../actions/allocations";
 
 interface AlgorithmFormProps {
   onResult: (result: AllocationResult) => void;

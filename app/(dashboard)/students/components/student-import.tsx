@@ -5,7 +5,7 @@ import { useDropzone } from "react-dropzone";
 import { Button } from "@/components/ui/button";
 import { Upload } from "lucide-react";
 import * as XLSX from "xlsx";
-import { Student } from "@/app/types/student";
+import { Student } from "@/app/(dashboard)/students/student";
 
 interface StudentImportProps {
   onImport?: (students: Student[]) => void;

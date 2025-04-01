@@ -18,8 +18,6 @@ import {
   Users,
   Network,
   GraduationCap,
-  MoveRight,
-  BarChart3,
   Settings,
   HelpCircle,
   ChevronRight,
@@ -49,22 +47,12 @@ const routes = [
     icon: GraduationCap,
   },
   {
-    title: "Class Management",
-    href: "/management",
-    icon: MoveRight,
-  },
-  {
-    title: "Reports",
-    href: "/reports",
-    icon: BarChart3,
-  },
-  {
     title: "Settings",
     href: "/settings",
     icon: Settings,
   },
   {
-    title: "Help",
+    title: "How it works",
     href: "/help",
     icon: HelpCircle,
   },

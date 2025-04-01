@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useRouter, useSearchParams } from "next/navigation";
 import { Input } from "@/components/ui/input";
 import {
   Select,
@@ -10,23 +10,48 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { Button } from "@/components/ui/button";
-import { StudentFilters as StudentFiltersType } from "@/app/types/student";
+import type { StudentFilters } from "@/app/(dashboard)/students/student";
 
-interface StudentFiltersProps {
-  onFilterChange?: (filters: StudentFiltersType) => void;
-}
+export function StudentFilters() {
+  const router = useRouter();
+  const searchParams = useSearchParams();
 
-export function StudentFilters({ onFilterChange }: StudentFiltersProps) {
-  const [filters, setFilters] = useState<StudentFiltersType>({
-    search: "",
-    grade: undefined,
-    performanceRange: undefined,
-  });
+  const currentFilters: StudentFilters = {
+    search: searchParams.get("search") ?? undefined,
+    grade: searchParams.get("grade") ?? undefined,
+    performanceRange: searchParams.get("performanceRange")
+      ? {
+          min: parseInt(searchParams.get("performanceRange")!.split("-")[0]),
+          max: parseInt(searchParams.get("performanceRange")!.split("-")[1]),
+        }
+      : undefined,
+  };
 
-  const handleFilterChange = (newFilters: Partial<StudentFiltersType>) => {
-    const updatedFilters = { ...filters, ...newFilters };
-    setFilters(updatedFilters);
-    onFilterChange?.(updatedFilters);
+  const handleFilterChange = (newFilters: Partial<StudentFilters>) => {
+    const params = new URLSearchParams(searchParams);
+
+    if (newFilters.search) {
+      params.set("search", newFilters.search);
+    } else {
+      params.delete("search");
+    }
+
+    if (newFilters.grade) {
+      params.set("grade", newFilters.grade);
+    } else {
+      params.delete("grade");
+    }
+
+    if (newFilters.performanceRange) {
+      params.set(
+        "performanceRange",
+        `${newFilters.performanceRange.min}-${newFilters.performanceRange.max}`
+      );
+    } else {
+      params.delete("performanceRange");
+    }
+
+    router.push(`/students?${params.toString()}`);
   };
 
   return (
@@ -34,12 +59,12 @@ export function StudentFilters({ onFilterChange }: StudentFiltersProps) {
       <div className="flex-1">
         <Input
           placeholder="Search students..."
-          value={filters.search}
+          value={currentFilters.search ?? ""}
           onChange={(e) => handleFilterChange({ search: e.target.value })}
         />
       </div>
       <Select
-        value={filters.grade}
+        value={currentFilters.grade}
         onValueChange={(value) => handleFilterChange({ grade: value })}
       >
         <SelectTrigger className="w-[180px]">
@@ -53,16 +78,33 @@ export function StudentFilters({ onFilterChange }: StudentFiltersProps) {
           <SelectItem value="F">Grade F</SelectItem>
         </SelectContent>
       </Select>
+      <Select
+        value={
+          currentFilters.performanceRange
+            ? `${currentFilters.performanceRange.min}-${currentFilters.performanceRange.max}`
+            : undefined
+        }
+        onValueChange={(value) => {
+          const [min, max] = value.split("-").map(Number);
+          handleFilterChange({
+            performanceRange: { min, max },
+          });
+        }}
+      >
+        <SelectTrigger className="w-[180px]">
+          <SelectValue placeholder="Performance range" />
+        </SelectTrigger>
+        <SelectContent>
+          <SelectItem value="0-50">0-50%</SelectItem>
+          <SelectItem value="50-70">50-70%</SelectItem>
+          <SelectItem value="70-85">70-85%</SelectItem>
+          <SelectItem value="85-100">85-100%</SelectItem>
+        </SelectContent>
+      </Select>
       <Button
         variant="outline"
         onClick={() => {
-          const clearedFilters = {
-            search: "",
-            grade: undefined,
-            performanceRange: undefined,
-          };
-          setFilters(clearedFilters);
-          onFilterChange?.(clearedFilters);
+          router.push("/students");
         }}
       >
         Clear Filters
