@@ -1,18 +1,19 @@
-// components/landing/HeroSection.jsx
 "use client";
 
 import { motion, useScroll, useTransform } from "motion/react";
 import { Button } from "@/components/ui/button";
 import NetworkGraphSVG from "./illustrations/NetworkGraphSVG";
 import ParallaxBackground from "./ParallaxBackground";
+import { useIsClient } from "usehooks-ts";
 
 export default function HeroSection() {
   const { scrollYProgress } = useScroll();
   const backgroundY = useTransform(scrollYProgress, [0, 1], [0, 0.3]);
+  const isClient = useIsClient();
 
   return (
     <section className="relative min-h-screen flex items-center justify-center overflow-hidden pt-20 pb-16">
-      <ParallaxBackground y={backgroundY} />
+      {isClient && <ParallaxBackground y={backgroundY} />}
       {/* Background Animation */}
       <div className="absolute inset-0 z-0">
         <div className="absolute top-20 left-10 w-64 h-64 bg-blue-300 rounded-full mix-blend-multiply filter blur-xl opacity-30 animate-blob"></div>

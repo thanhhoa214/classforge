@@ -1,6 +1,5 @@
-// components/landing/TestimonialsSection.jsx
 "use client";
-import { motion } from "motion/react";
+import { motion, useScroll, useTransform } from "motion/react";
 import { useInView } from "react-intersection-observer";
 import { Card, CardContent } from "@/components/ui/card";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
@@ -54,9 +53,19 @@ export default function TestimonialsSection() {
       transition: { duration: 0.6 },
     },
   };
+  const { scrollYProgress } = useScroll();
+  const testimonialsOpacity = useTransform(
+    scrollYProgress,
+    [0.5, 0.6, 0.7],
+    [0, 1, 1]
+  );
 
   return (
-    <section className="py-24 bg-white relative" id="testimonials">
+    <motion.section
+      style={{ opacity: testimonialsOpacity }}
+      className="py-24 bg-white relative"
+      id="testimonials"
+    >
       <div className="container mx-auto px-4">
         <div className="text-center mb-16">
           <motion.h2
@@ -118,6 +127,6 @@ export default function TestimonialsSection() {
           ))}
         </motion.div>
       </div>
-    </section>
+    </motion.section>
   );
 }

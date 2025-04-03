@@ -1,6 +1,5 @@
-// components/landing/HowItWorksSection.jsx
 "use client";
-import { motion } from "motion/react";
+import { motion, useScroll, useTransform } from "motion/react";
 import { useInView } from "react-intersection-observer";
 import ProcessSVG from "./illustrations/ProcessSVG";
 
@@ -56,8 +55,16 @@ export default function HowItWorksSection() {
     },
   };
 
+  const { scrollYProgress } = useScroll();
+  const howItWorksOpacity = useTransform(
+    scrollYProgress,
+    [0.3, 0.4, 0.5],
+    [0, 1, 1]
+  );
+
   return (
-    <section
+    <motion.section
+      style={{ opacity: howItWorksOpacity }}
       className="py-24 bg-gradient-to-br from-indigo-50 to-purple-50 relative"
       id="how-it-works"
     >
@@ -122,6 +129,6 @@ export default function HowItWorksSection() {
           </motion.div>
         </div>
       </div>
-    </section>
+    </motion.section>
   );
 }

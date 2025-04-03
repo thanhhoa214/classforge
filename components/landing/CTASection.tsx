@@ -1,7 +1,6 @@
-// components/landing/CTASection.jsx
 "use client";
 
-import { motion } from "motion/react";
+import { motion, useScroll, useTransform } from "motion/react";
 import { useInView } from "react-intersection-observer";
 import { Button } from "@/components/ui/button";
 import CTASVG from "./illustrations/CTASVG";
@@ -12,9 +11,12 @@ export default function CTASection() {
     triggerOnce: true,
     threshold: 0.1,
   });
+  const { scrollYProgress } = useScroll();
+  const ctaOpacity = useTransform(scrollYProgress, [0.7, 0.8, 0.9], [0, 1, 1]);
 
   return (
-    <section
+    <motion.section
+      style={{ opacity: ctaOpacity }}
       className="py-24 bg-gradient-to-br from-indigo-900 to-purple-800 text-white relative overflow-hidden"
       id="cta"
     >
@@ -64,6 +66,6 @@ export default function CTASection() {
           </motion.div>
         </div>
       </div>
-    </section>
+    </motion.section>
   );
 }

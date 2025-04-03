@@ -1,4 +1,3 @@
-// components/landing/illustrations/CTASVG.jsx
 "use client";
 
 import { motion } from "motion/react";

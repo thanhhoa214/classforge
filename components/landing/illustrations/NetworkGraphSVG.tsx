@@ -1,4 +1,3 @@
-// components/landing/illustrations/NetworkGraphSVG.jsx
 "use client";
 
 import { useRef } from "react";

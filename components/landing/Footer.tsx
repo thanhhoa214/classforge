@@ -1,4 +1,3 @@
-// components/landing/Footer.jsx
 import { Mail, Phone, MapPin } from "lucide-react";
 
 export default function Footer() {

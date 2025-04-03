@@ -1,7 +1,6 @@
-// components/landing/FeaturesSection.jsx
 "use client";
 
-import { motion } from "motion/react";
+import { motion, useScroll, useTransform } from "motion/react";
 import { useInView } from "react-intersection-observer";
 import { Card, CardContent } from "@/components/ui/card";
 import {
@@ -77,8 +76,21 @@ export default function FeaturesSection() {
     threshold: 0.1,
   });
 
+  const { scrollYProgress } = useScroll();
+
+  // Create parallax effect values
+  const featuresOpacity = useTransform(
+    scrollYProgress,
+    [0.1, 0.2, 0.3],
+    [0, 1, 1]
+  );
+
   return (
-    <section className="py-24 bg-white relative" id="features">
+    <motion.section
+      style={{ opacity: featuresOpacity }}
+      className="py-24 bg-white relative"
+      id="features"
+    >
       <div className="container mx-auto px-4">
         <div className="text-center mb-16">
           <motion.h2
@@ -123,6 +135,6 @@ export default function FeaturesSection() {
           ))}
         </motion.div>
       </div>
-    </section>
+    </motion.section>
   );
 }
