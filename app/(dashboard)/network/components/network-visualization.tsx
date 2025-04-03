@@ -22,12 +22,6 @@ export function NetworkVisualization({ data }: NetworkVisualizationProps) {
       <SigmaContainer
         style={{ height: "100%", width: "100%" }}
         settings={{
-          renderEdgeLabels: true,
-          labelColor: { color: "#000" },
-          defaultNodeColor: "#ec5148",
-          defaultEdgeColor: "#999",
-          labelSize: 14,
-          edgeLabelSize: 12,
           allowInvalidContainer: true,
         }}
       >
