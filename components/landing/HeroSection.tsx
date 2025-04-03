@@ -39,17 +39,8 @@ export default function HeroSection() {
               isolation, and improve educational outcomes
             </p>
             <div className="flex flex-wrap gap-4 justify-center lg:justify-start">
-              <Button
-                size="lg"
-                className="bg-indigo-600 hover:bg-indigo-700 text-white"
-              >
-                Sign In
-              </Button>
-              <Button
-                size="lg"
-                variant="outline"
-                className="border-indigo-600 text-indigo-600 hover:bg-indigo-50"
-              >
+              <Button size="lg">Sign In</Button>
+              <Button size="lg" variant="outline">
                 Learn More
               </Button>
             </div>
