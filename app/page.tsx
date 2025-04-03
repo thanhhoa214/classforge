@@ -4,17 +4,13 @@ import HowItWorksSection from "@/components/landing/HowItWorksSection";
 import TestimonialsSection from "@/components/landing/TestimonialsSection";
 import CTASection from "@/components/landing/CTASection";
 import Footer from "@/components/landing/Footer";
+import { Metadata } from "next";
 
-// export const metadata = {
-//   title: "Landing Page",
-//   description: "A landing page with parallax scrolling effects.",
-//   openGraph: {
-//     title: "Landing Page",
-//     description: "A landing page with parallax scrolling effects.",
-//     url: "https://example.com/landing-page",
-//     siteName: "Landing Page",
-//   },
-// };
+export const metadata: Metadata = {
+  title: "ClassForge",
+  description:
+    "Optimize classroom dynamics with powerful social network analysis.",
+};
 
 export default function LandingPage() {
   return (
