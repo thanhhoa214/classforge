@@ -70,7 +70,7 @@ export function Sidenav() {
     <div className="relative h-full p-1">
       <nav
         className={cn(
-          "grid items-start gap-2 transition-all duration-300",
+          "grid items-start gap-1 transition-all duration-300",
           isCollapsed ? "w-10" : "w-full"
         )}
       >

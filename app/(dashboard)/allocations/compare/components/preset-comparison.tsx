@@ -23,11 +23,8 @@ import {
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { useToast } from "@/components/ui/use-toast";
 import { comparePresets, getPresets } from "@/app/actions/allocations";
-import {
-  type Preset,
-  type AllocationConfig,
-  type AllocationResult,
-} from "../types";
+import { AllocationResult } from "../../types";
+import { Preset } from "@prisma/client";
 
 const comparisonSchema = z.object({
   preset1Id: z.string().min(1, "Please select a preset"),
@@ -36,18 +33,14 @@ const comparisonSchema = z.object({
 
 type ComparisonFormData = z.infer<typeof comparisonSchema>;
 
-interface ComparisonResult {
-  preset1: {
+export type ComparisonResult = Record<
+  "preset1" | "preset2",
+  {
     name: string;
-    config: AllocationConfig;
+    config: Preset["config"];
     allocation: AllocationResult;
-  };
-  preset2: {
-    name: string;
-    config: AllocationConfig;
-    allocation: AllocationResult;
-  };
-}
+  }
+>;
 
 export function PresetComparison() {
   const { toast } = useToast();

@@ -52,29 +52,29 @@ export function PreviewPanel({ result }: PreviewPanelProps) {
           <div className="space-y-4">
             <div>
               <div className="flex justify-between text-sm mb-1">
-                <span>Isolation Score</span>
-                <span>{Math.round(result.metrics.isolationScore * 100)}%</span>
+                <span>Academic Balance</span>
+                <span>{Math.round(result.metrics.academicBalance * 100)}%</span>
               </div>
-              <Progress value={result.metrics.isolationScore * 100} />
+              <Progress value={result.metrics.academicBalance * 100} />
             </div>
             <div>
               <div className="flex justify-between text-sm mb-1">
-                <span>Connection Density</span>
+                <span>Constraint Satisfaction</span>
                 <span>
-                  {Math.round(result.metrics.connectionDensity * 100)}%
+                  {Math.round(result.metrics.constraintSatisfaction * 100)}%
                 </span>
               </div>
-              <Progress value={result.metrics.connectionDensity * 100} />
+              <Progress value={result.metrics.constraintSatisfaction * 100} />
             </div>
             <div>
               <div className="flex justify-between text-sm mb-1">
-                <span>Balance Score</span>
-                <span>{Math.round(result.metrics.balanceScore * 100)}%</span>
+                <span>Overall Score</span>
+                <span>{Math.round(result.metrics.overallScore * 100)}%</span>
               </div>
-              <Progress value={result.metrics.balanceScore * 100} />
+              <Progress value={result.metrics.overallScore * 100} />
             </div>
             <div className="text-sm text-muted-foreground">
-              Computation Time: {result.metrics.computationTime.toFixed(2)}s
+              Social Balance: {result.metrics.socialBalance.toFixed(2)}s
             </div>
           </div>
         </div>

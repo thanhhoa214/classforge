@@ -62,14 +62,6 @@ export interface AllocationResult {
   };
 }
 
-export interface Preset {
-  id: string;
-  name: string;
-  config: AllocationConfig;
-  createdAt: Date;
-  updatedAt: Date;
-}
-
 export const PrioritySchema = z.object({
   id: z.string(),
   name: z.string(),

@@ -5,6 +5,7 @@ import { Button } from "@/components/ui/button";
 import NetworkGraphSVG from "./illustrations/NetworkGraphSVG";
 import ParallaxBackground from "./ParallaxBackground";
 import { useIsClient } from "usehooks-ts";
+import Link from "next/link";
 
 export default function HeroSection() {
   const { scrollYProgress } = useScroll();
@@ -40,9 +41,11 @@ export default function HeroSection() {
               isolation, and improve educational outcomes
             </p>
             <div className="flex flex-wrap gap-4 justify-center lg:justify-start">
-              <Button size="lg">Sign In</Button>
+              <Button size="lg">
+                <Link href="/dashboard">Explore Dashboard</Link>
+              </Button>
               <Button size="lg" variant="outline">
-                Learn More
+                Sign In
               </Button>
             </div>
           </motion.div>

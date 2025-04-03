@@ -5,40 +5,108 @@ import { z } from "zod";
 import {
   AllocationConfigSchema,
   type AllocationResult,
-  PresetSchema,
 } from "../(dashboard)/allocations/types";
+import { prisma } from "@/lib/prisma";
+import { Preset } from "@prisma/client";
+import { ComparisonResult } from "../(dashboard)/allocations/compare/components/preset-comparison";
 
 export async function generateAllocation(
-  config: z.infer<typeof AllocationConfigSchema>
+  config: Preset["config"]
 ): Promise<AllocationResult> {
   try {
     // Validate the config
     const validatedConfig = AllocationConfigSchema.parse(config);
+    console.log(validatedConfig);
 
     // TODO: Implement actual allocation generation logic
     // This is a mock implementation
     const result: AllocationResult = {
-      id: crypto.randomUUID(),
-      config: validatedConfig,
       classrooms: [
         {
           id: "class-1",
           name: "Class A",
-          students: ["student-1", "student-2", "student-3"],
+          students: [
+            {
+              id: "student-1",
+              name: "Alice",
+              metrics: {
+                socialConnections: 0.9,
+                academicPerformance: 0.8,
+                behavioralMetrics: 0.85,
+                learningStyle: 0.8,
+                specialNeeds: 0.7,
+              },
+            },
+            {
+              id: "student-2",
+              name: "Bob",
+              metrics: {
+                socialConnections: 0.85,
+                academicPerformance: 0.75,
+                behavioralMetrics: 0.8,
+                learningStyle: 0.75,
+                specialNeeds: 0.65,
+              },
+            },
+            {
+              id: "student-3",
+              name: "Charlie",
+              metrics: {
+                socialConnections: 0.8,
+                academicPerformance: 0.7,
+                behavioralMetrics: 0.75,
+                learningStyle: 0.7,
+                specialNeeds: 0.6,
+              },
+            },
+          ],
         },
         {
           id: "class-2",
           name: "Class B",
-          students: ["student-4", "student-5", "student-6"],
+          students: [
+            {
+              id: "student-4",
+              name: "David",
+              metrics: {
+                socialConnections: 0.8,
+                academicPerformance: 0.7,
+                behavioralMetrics: 0.75,
+                learningStyle: 0.7,
+                specialNeeds: 0.6,
+              },
+            },
+            {
+              id: "student-5",
+              name: "Eve",
+              metrics: {
+                socialConnections: 0.75,
+                academicPerformance: 0.65,
+                behavioralMetrics: 0.7,
+                learningStyle: 0.65,
+                specialNeeds: 0.55,
+              },
+            },
+            {
+              id: "student-6",
+              name: "Frank",
+              metrics: {
+                socialConnections: 0.7,
+                academicPerformance: 0.6,
+                behavioralMetrics: 0.65,
+                learningStyle: 0.6,
+                specialNeeds: 0.5,
+              },
+            },
+          ],
         },
       ],
       metrics: {
-        isolationScore: 0.85,
-        connectionDensity: 0.72,
-        balanceScore: 0.91,
-        computationTime: 1.2,
+        socialBalance: 0.85,
+        academicBalance: 0.78,
+        constraintSatisfaction: 0.95,
+        overallScore: 0.88,
       },
-      createdAt: new Date(),
     };
 
     // Revalidate the allocations page
@@ -58,6 +126,7 @@ export async function saveAllocationConfig(
 ): Promise<void> {
   try {
     const validatedConfig = AllocationConfigSchema.parse(config);
+    console.log(validatedConfig);
 
     // TODO: Implement actual config saving logic
     // This would typically involve saving to a database
@@ -77,6 +146,7 @@ export async function savePreset(
 ): Promise<void> {
   try {
     const validatedConfig = AllocationConfigSchema.parse(config);
+    console.log(validatedConfig);
 
     // TODO: Implement actual preset saving logic
     // This would typically involve saving to a database with user association
@@ -90,23 +160,49 @@ export async function savePreset(
   }
 }
 
-export async function loadPresets(): Promise<z.infer<typeof PresetSchema>[]> {
-  try {
-    // TODO: Implement actual preset loading logic
-    // This would typically involve fetching from a database for the current user
-    return [];
-  } catch (error) {
-    throw new Error("Failed to load presets");
-  }
+export async function getPresets() {
+  return prisma.preset.findMany();
 }
 
 export async function deletePreset(id: string): Promise<void> {
   try {
-    // TODO: Implement actual preset deletion logic
-    // This would typically involve deleting from a database
-
+    await prisma.preset.delete({ where: { id } });
     revalidatePath("/allocations");
-  } catch (error) {
+  } catch {
     throw new Error("Failed to delete preset");
+  }
+}
+
+export async function comparePresets(
+  preset1Id: string,
+  preset2Id: string
+): Promise<ComparisonResult> {
+  try {
+    const [preset1, preset2] = await Promise.all([
+      prisma.preset.findUnique({ where: { id: preset1Id } }),
+      prisma.preset.findUnique({ where: { id: preset2Id } }),
+    ]);
+
+    if (!preset1 || !preset2) {
+      throw new Error("One or both presets not found");
+    }
+
+    const allocation1 = await generateAllocation(preset1.config);
+    const allocation2 = await generateAllocation(preset2.config);
+
+    return {
+      preset1: {
+        name: preset1.name,
+        config: preset1.config,
+        allocation: allocation1,
+      },
+      preset2: {
+        name: preset2.name,
+        config: preset2.config,
+        allocation: allocation2,
+      },
+    };
+  } catch {
+    throw new Error("Failed to compare presets");
   }
 }

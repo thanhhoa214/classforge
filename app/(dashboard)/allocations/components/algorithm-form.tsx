@@ -38,15 +38,15 @@ import {
   AllocationConfigSchema,
   type AllocationResult,
   PriorityType,
-  type Preset,
   type Priority,
 } from "../types";
 import {
   generateAllocation,
   savePreset,
-  loadPresets,
+  getPresets,
   deletePreset,
 } from "../../../actions/allocations";
+import { Preset } from "@prisma/client";
 
 interface AlgorithmFormProps {
   onResult: (result: AllocationResult) => void;
@@ -153,12 +153,14 @@ export function AlgorithmForm({ onResult }: AlgorithmFormProps) {
   });
 
   useEffect(() => {
-    loadPresets().then(setPresets).catch(console.error);
+    getPresets().then(setPresets).catch(console.error);
   }, []);
 
   async function onSubmit(data: AllocationConfig) {
     try {
-      const result = await generateAllocation(data);
+      console.log("Submitting data:", data);
+
+      const result = await generateAllocation({});
       onResult(result);
       toast({
         title: "Allocation Generated",
@@ -180,7 +182,7 @@ export function AlgorithmForm({ onResult }: AlgorithmFormProps) {
   async function handleSavePreset() {
     try {
       await savePreset(presetName, form.getValues());
-      const updatedPresets = await loadPresets();
+      const updatedPresets = await getPresets();
       setPresets(updatedPresets);
       setIsPresetDialogOpen(false);
       setPresetName("");
@@ -201,7 +203,7 @@ export function AlgorithmForm({ onResult }: AlgorithmFormProps) {
   async function handleDeletePreset(id: string) {
     try {
       await deletePreset(id);
-      const updatedPresets = await loadPresets();
+      const updatedPresets = await getPresets();
       setPresets(updatedPresets);
       toast({
         title: "Preset Deleted",
@@ -267,7 +269,7 @@ export function AlgorithmForm({ onResult }: AlgorithmFormProps) {
                   <Button
                     variant="ghost"
                     size="sm"
-                    onClick={() => form.reset(preset.config)}
+                    onClick={() => form.reset()}
                   >
                     Load
                   </Button>
