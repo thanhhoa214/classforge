@@ -14,6 +14,7 @@ import { NetworkVisualization } from "./components/network-visualization";
 import { HoverCard, HoverCardContent, HoverCardTrigger } from "@/components/ui/hover-card";
 import { ScrollArea } from "@/components/ui/scroll-area";
 
+// add node interface
 interface NodeDetails extends NetworkNode {
   email?: string;
   grade?: string;
