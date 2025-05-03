@@ -5,7 +5,7 @@ import { NetworkData } from "@/app/actions/network";
 // Dynamically import the Sigma components with no SSR
 const SigmaContainer = dynamic(
   () => import("@react-sigma/core").then((mod) => mod.SigmaContainer),
-  { ssr: false }
+  { ssr: false, loading: () => <p>Loading graph...</p> } // Add a loading state
 );
 
 const NetworkGraph = dynamic(
@@ -14,9 +14,11 @@ const NetworkGraph = dynamic(
 );
 interface NetworkVisualizationProps {
   data: NetworkData;
+  onNodeClick: (nodeId: string | null) => void; // Callback for node click
+  onNodeHover: (nodeId: string | null) => void; // Callback for node hover
 }
 
-export function NetworkVisualization({ data }: NetworkVisualizationProps) {
+export function NetworkVisualization({ data, onNodeClick, onNodeHover }: NetworkVisualizationProps) {
   return (
     <div className="w-full h-full">
       <SigmaContainer
@@ -25,8 +27,15 @@ export function NetworkVisualization({ data }: NetworkVisualizationProps) {
           allowInvalidContainer: true,
         }}
       >
-        <NetworkGraph data={data} />
+        <NetworkGraph 
+          data={data} 
+          onNodeClick={onNodeClick} 
+          onNodeHover={onNodeHover} 
+        />
       </SigmaContainer>
     </div>
   );
 }
+
+// Need to import Graph constructor if NetworkGraph uses it directly
+import Graph from "graphology";
