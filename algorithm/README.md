@@ -54,10 +54,15 @@ File Descriptions
 4. cp_sat.py
    - Allocates students into balanced classes using CP-SAT solver
    - Constraints: equal class sizes, one class per student, optimise ties (minimise bully)
+  
+5. visualise.py
+   - The allocation is visualise using networkX, node coloured by class, and edge coloured by relationship type.
 
-5. execution.py
+6. execution.py
    - Main file to run the full pipeline
    - Loads data, calls all other modules, and returns final outputs
+  
+   
 
 Input
 -----
