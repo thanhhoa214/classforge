@@ -9,7 +9,7 @@ RUN apt-get update && apt-get install -y \
 
 # Install Python dependencies
 RUN pip install torch --index-url https://download.pytorch.org/whl/cpu
-RUN pip install pandas numpy scikit-learn matplotlib torch-scatter torch-sparse torch-geometric ortools visualise
+RUN pip install pandas numpy scikit-learn matplotlib torch-scatter torch-sparse torch-geometric ortools
 
 # Copy the rest of the application
 COPY . .
