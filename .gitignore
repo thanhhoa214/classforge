@@ -7,3 +7,5 @@ __pycache__/
 *.py[cod]
 /dataloading/neo4j
 /test.ipynb
+
+neo4j/*
