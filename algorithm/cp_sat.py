@@ -1,0 +1,125 @@
+#----------------------------Re-apply threshold, CP-SAT (with enrich link)----------------------------#
+import pandas as pd
+import numpy as np
+import torch
+from ortools.sat.python import cp_model
+
+# ==============================
+# Step 1: Build enriched links
+# ==============================
+def build_enriched_links(predicted_links_dict):
+    enriched_links = []
+
+    friends_set = set(predicted_links_dict.get("friends", []))
+    for u, v in friends_set:
+        if (v, u) in friends_set:
+            enriched_links.append((u, v, "mutual_friend", 10))
+        else:
+            enriched_links.append((u, v, "oneway_friend", 1))
+
+    for u, v in predicted_links_dict.get("advice", []):
+        enriched_links.append((u, v, "advice", 10))
+
+    for u, v in predicted_links_dict.get("moretime", []):
+        enriched_links.append((u, v, "moretime", 1))
+
+    for u, v in predicted_links_dict.get("influential", []):
+        enriched_links.append((u, v, "influential", 10))
+
+    for u, v in predicted_links_dict.get("disrespect", []):
+        enriched_links.append((u, v, "bully", -10))
+        enriched_links.append((v, u, "victim", 1))
+
+    return enriched_links
+
+# ==============================
+# Step 2: Re-threshold links
+# ==============================
+def apply_thresholds_from_classes(embeddings, model, relation_list, alloc_df, same_class_threshold=0.5, diff_class_threshold=0.7):
+    model.eval()
+    predicted_links = {rel: [] for rel in relation_list}
+
+    with torch.no_grad():
+        n = embeddings.size(0)
+        for u in range(n):
+            for v in range(n):
+                if u == v:
+                    continue
+                feature = torch.cat([embeddings[u], embeddings[v]]).unsqueeze(0)
+                logits = model(feature)
+                probs = torch.sigmoid(logits).squeeze(0)
+
+                same_class = alloc_df.iloc[u]['Assigned_Class'] == alloc_df.iloc[v]['Assigned_Class']
+                threshold = same_class_threshold if same_class else diff_class_threshold
+
+                valid = True
+                if probs[relation_list.index("friends")].item() >= threshold and probs[relation_list.index("disrespect")].item() >= threshold:
+                    valid = False
+                if probs[relation_list.index("disrespect")].item() >= threshold and probs[relation_list.index("influential")].item() < threshold:
+                    valid = False
+
+                if valid:
+                    for idx, prob in enumerate(probs):
+                        if prob.item() >= threshold:
+                            predicted_links[relation_list[idx]].append((u, v))
+    return predicted_links
+
+# ==============================
+# Step 3: CP-SAT allocation
+# ==============================
+def cpsat_wellbeing_and_ties_allocation(df, n_classes, enriched_links, wellbeing_weight=1, tolerance=0.1):
+    model = cp_model.CpModel()
+    n_students = len(df)
+    students = range(n_students)
+    classes = range(n_classes)
+
+    assign = {}
+    for s in students:
+        for c in classes:
+            assign[(s, c)] = model.NewBoolVar(f'student_{s}_class_{c}')
+
+    for s in students:
+        model.AddExactlyOne(assign[(s, c)] for c in classes)
+
+    base_size = n_students // n_classes
+    min_size = int(base_size * (1 - tolerance))
+    max_size = int(base_size * (1 + tolerance))
+    for c in classes:
+        model.Add(sum(assign[(s, c)] for s in students) >= min_size)
+        model.Add(sum(assign[(s, c)] for s in students) <= max_size)
+
+    objective_terms = []
+
+    for s in students:
+        wellbeing_score = (
+            df.iloc[s]['academic_score'] +
+            df.iloc[s]['mental_score'] +
+            df.iloc[s]['social_score']
+        )
+        for c in classes:
+            objective_terms.append(assign[(s, c)] * int(wellbeing_score * wellbeing_weight * 100))
+
+    for u, v, relation, weight in enriched_links:
+        for c in classes:
+            same_class = model.NewBoolVar(f'same_class_{relation}_{u}_{v}_{c}')
+            model.AddMultiplicationEquality(same_class, [assign[(u, c)], assign[(v, c)]])
+            objective_terms.append(weight * same_class)
+
+    model.Maximize(sum(objective_terms))
+
+    solver = cp_model.CpSolver()
+    solver.parameters.max_time_in_seconds = 20
+    solver.parameters.num_search_workers = 8
+    status = solver.Solve(model)
+
+    allocation = []
+
+    if status in (cp_model.OPTIMAL, cp_model.FEASIBLE):
+        for s in students:
+            for c in classes:
+                if solver.BooleanValue(assign[(s, c)]):
+                    allocation.append((s, c))
+    else:
+        return None
+
+    return allocation
