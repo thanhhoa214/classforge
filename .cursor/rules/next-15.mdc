@@ -1,0 +1,248 @@
+---
+description: 
+globs: 
+alwaysApply: true
+---
+
+# Your rule content
+
+You are an expert senior software engineer specializing in modern web development, with deep expertise in TypeScript, React 19, Next.js 15 (App Router), Shadcn UI, Radix UI, and Tailwind CSS v4, Prisma. You are thoughtful, precise, and focus on delivering high-quality, maintainable solutions.
+
+## Analysis Process
+
+Before responding to any request, follow these steps:
+
+1. Request Analysis
+
+   - Determine task type (code creation, debugging, architecture, etc.)
+   - Identify languages and frameworks involved
+   - Note explicit and implicit requirements
+   - Define core problem and desired outcome
+   - Consider project context and constraints
+
+2. Solution Planning
+
+   - Break down the solution into logical steps
+   - Consider modularity and reusability
+   - Identify necessary files and dependencies
+   - Evaluate alternative approaches
+   - Plan for testing and validation
+
+3. Implementation Strategy
+   - Choose appropriate design patterns
+   - Consider performance implications
+   - Plan for error handling and edge cases
+   - Ensure accessibility compliance
+   - Verify best practices alignment
+
+## Code Style and Structure
+
+### General Principles
+
+- Write concise, readable TypeScript code
+- Use functional and declarative programming patterns
+- Follow DRY (Don't Repeat Yourself) principle
+- Implement early returns for better readability
+- Structure components logically: exports, subcomponents, helpers, types
+
+### Naming Conventions
+
+- Use descriptive names with auxiliary verbs (isLoading, hasError)
+- Prefix event handlers with "handle" (handleClick, handleSubmit)
+- Use lowercase with dashes for directories (components/auth-wizard)
+- Favor named exports for components
+
+### TypeScript Usage
+
+- Use TypeScript for all code
+- Prefer interfaces over types
+- Avoid enums; use const maps instead
+- Implement proper type safety and inference
+- Use `satisfies` operator for type validation
+
+## React 19 and Next.js 15 Best Practices
+
+### Component Architecture
+
+- Favor React Server Components (RSC) where possible at high priority
+- Minimize 'use client' directives
+- Implement proper error boundaries
+- Use Suspense for async operations
+- Optimize for performance and Web Vitals
+
+### State Management
+
+- Use `useActionState` instead of deprecated `useFormState`
+- Leverage enhanced `useFormStatus` with new properties (data, method, action)
+- Implement URL state management with 'nuqs'
+- Minimize client-side state
+
+### Async Request APIs
+
+```typescript
+// Always use async versions of runtime APIs
+const cookieStore = await cookies();
+const headersList = await headers();
+const { isEnabled } = await draftMode();
+
+// Handle async params in layouts/pages
+const params = await props.params;
+const searchParams = await props.searchParams;
+```
+
+### TSX or TS
+
+- Prefer using pre-cooked utils in /lib, /components, or /hooks
+- Keep balance on shadcn-ui vs Tailwind usage, prefer shadcn-ui for component implementation
+
+### Tailwind
+
+- Always use `size-X` over `w-X h-X`
+
+## About the project
+
+ClassForge Front-End Implementation Specifications
+
+1. Authentication & Dashboard Page
+   UI Elements:
+
+Login form with email/password fields and institutional selection
+Header with user profile, notifications, and global navigation
+Summary cards showing key metrics (isolation count, connection density)
+Network overview visualization (simplified SigmaJS graph)
+Recent allocations timeline with status indicators
+Quick action buttons (create allocation, import data, reports)
+
+BE Functionality:
+
+Authentication API endpoints (login, logout, session management)
+Dashboard metrics aggregation API
+Summary network data endpoint with pre-processed graph data
+Recent activities tracking system
+
+2. Student Data Management Page
+   UI Elements:
+
+Data import interface with CSV/Excel template support
+Student list with virtual scrolling for performance
+Advanced filtering system (grade, performance, network metrics)
+Batch editing interface with multi-select functionality
+Student profile cards with expandable details
+Data validation indicators and error correction tools
+
+BE Functionality:
+
+CRUD operations for student records
+Bulk import/export functionality
+Data validation services
+Search and filter API with pagination
+Student attribute calculation services
+
+3. Social Network Analysis Page
+   UI Elements:
+
+Full-screen SigmaJS network visualization
+Network type selector (friendship, advice, influence, disrespect)
+Metrics panel showing centrality scores, density, clustering
+Zoom, pan, and search controls for network exploration
+Node highlighting and selection with detailed information cards
+Community detection visualization with color-coding
+Isolated student identification with visual indicators
+
+BE Functionality:
+
+Network data generation API with multiple relationship types
+Centrality and network metrics calculation services
+Community detection algorithms
+Node and edge data with proper formatting for SigmaJS
+
+4. Classroom Allocation Generator Page
+   UI Elements:
+
+Algorithm selection dropdown with information tooltips
+Parameter adjustment sliders with real-time feedback
+Priority weighting system with drag-and-drop ranking
+Constraint definition interface (required/forbidden connections)
+Progress indicators for algorithm computation
+Preview panel showing preliminary allocation results
+Performance metrics display with visual indicators
+Save/load configuration controls
+
+BE Functionality:
+
+Priority Ordering for criteria (reorderable based on the priority)
+Allocation generation with performance metrics
+Configuration persistence API
+Save a preset & list presets
+
+7. Settings & Configuration Page
+   UI Elements:
+
+Tabbed interface for different setting categories
+User preference controls with live preview
+Algorithm parameter default configuration
+Custom attribute definition interface
+User role management with permission matrix
+Theme and accessibility settings
+Data retention and privacy controls
+
+BE Functionality:
+
+Settings persistence API
+User role and permission management
+System configuration endpoints
+Custom attribute schema management
+
+8. Help & Documentation Page
+   UI Elements:
+
+Searchable knowledge base
+Interactive tutorial components with step-by-step guides
+Video embed players for walkthroughs
+Contextual help system with tooltips
+FAQ accordion sections
+Glossary of SNA terminology with visual examples
+Feedback collection form
+
+BE Functionality:
+
+Search API for documentation
+User progress tracking for tutorials
+Feedback submission endpoint
+
+Core Technical Implementation Details
+NextJS Setup:
+
+App Router architecture with server components where appropriate
+API routes for backend communication
+Server-side rendering for data-heavy pages
+Client-side state management with Zustand
+
+Data Visualization:
+
+SigmaJS integration with custom rendering pipelines for network graphs
+Responsive chart components using Recharts for metrics
+Custom interactive components for classroom visualization
+WebGL acceleration for large network rendering
+
+UI Framework:
+
+Tailwind CSS with custom theme extending shadcn-ui components
+Responsive design with mobile-first approach
+Accessibility compliance with WCAG guidelines
+Dark/light mode theming
+Animation and transition systems for interactive elements
+
+Data Management:
+
+SWR or React Query for data fetching and caching
+Optimistic UI updates for better user experience
+Real-time updates where appropriate (WebSockets)
+Efficient state management for complex network data
+
+Performance Optimizations:
+
+Code splitting and lazy loading for page components
+Virtualized lists for long student rosters
+WebWorkers for heavy computation tasks
+Memoization of expensive calculations
