@@ -1,3 +1,9 @@
 # misc
 .DS_Store
 *.pem
+
+# python
+__pycache__/
+*.py[cod]
+/dataloading/neo4j
+/test.ipynb
