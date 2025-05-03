@@ -1,0 +1,36 @@
+MATCH (p:Participant {participant_id: $participant_id}), 
+      (pr:ProcessRun {id: $run_id})
+MERGE (p)<-[:has_data]-(d:SurveyData {
+  manbox5_1       : $manbox5_1,
+  manbox5_2       : $manbox5_2,
+  manbox5_3       : $manbox5_3,
+  manbox5_4       : $manbox5_4,
+  manbox5_5       : $manbox5_5,
+  isolated        : $isolated,
+  women_different : $womendifferent,
+  language        : $language,
+  covid           : $covid,
+  criticises      : $criticises,
+  men_better_stem : $menbetterstem,
+  pwi_wellbeing   : $pwi_wellbeing,
+  intelligence1   : $intelligence1,
+  intelligence2   : $intelligence2,
+  soft            : $soft,
+  opinion         : $opinion,
+  nerds           : $nerds,
+  comfortable     : $comfortable,
+  future          : $future,
+  bullying        : $bullying,
+  perc_effort     : $perc_effort,
+  attendance      : $attendance,
+  perc_academic   : $perc_academic,
+  current_class   : $current_class,
+  nervous         : $nervous,
+  hopeless        : $hopeless,
+  restless        : $restless,
+  depressed       : $depressed,
+  tried           : $tried,
+  worthless       : $worthless
+}
+) <-[:computed_data]-(pr)
+RETURN p.participant_id AS participant_id;
