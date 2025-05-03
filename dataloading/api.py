@@ -1,28 +1,13 @@
 import dotenv
 import pyvis
-import json
 import os
 from neo4j import GraphDatabase
 import pandas as pd
 
-def main():
-    load_status = dotenv.load_dotenv("db.env")
-    if load_status is False:
-        raise RuntimeError('Environment variables not loaded.')
-
-    URI = os.getenv("NEO4J_URI")
-    AUTH = (os.getenv("NEO4J_USERNAME"), os.getenv("NEO4J_PASSWORD"))
-
-    with GraphDatabase.driver(URI, auth=AUTH) as driver:
-        driver.verify_connectivity()
-        print("Connection established.")
-        db = DB(driver)
-        
-
 class DB:
-    def __init__(self):
+    def __init__(self, driver=None):
         self.database = ""
-        self.driver: GraphDatabase.driver = None
+        self.driver: GraphDatabase.driver = driver
         self.cypher_path = os.path.join(os.path.dirname(__file__), "cypher")
         self.cache = {}
     
@@ -175,6 +160,3 @@ class DB:
         if not cypher:
             raise ValueError(f"No cypher for {node_type}.{query_type}")
         return self.query_to_dataframe(cypher, params)
-
-if __name__ == "__main__":
-    main()
