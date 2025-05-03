@@ -123,3 +123,225 @@ def cpsat_wellbeing_and_ties_allocation(df, n_classes, enriched_links, wellbeing
         return None
 
     return allocation
+
+
+# maximise social score
+def cpsat_social_allocation(df, n_classes, enriched_links, wellbeing_weight=1, dominance_factor=1000, penalty_factor=100, tolerance=0.1, social_boost_factor=2.0):
+    model = cp_model.CpModel()
+    n_students = len(df)
+    students = range(n_students)
+    classes = range(n_classes)
+
+    assign = {}
+    for s in students:
+        for c in classes:
+            assign[(s, c)] = model.NewBoolVar(f'student_{s}_class_{c}')
+
+    for s in students:
+        model.AddExactlyOne(assign[(s, c)] for c in classes)
+
+    base_size = n_students // n_classes
+    min_size = int(base_size * (1 - tolerance))
+    max_size = int(base_size * (1 + tolerance))
+    for c in classes:
+        model.Add(sum(assign[(s, c)] for s in students) >= min_size)
+        model.Add(sum(assign[(s, c)] for s in students) <= max_size)
+        
+    objective_terms = []
+
+    for s in students:
+        for c in classes:
+            # Student scores
+            social_score = df.iloc[s]['social_score']
+            academic_score = df.iloc[s]['academic_score']
+            mental_score = df.iloc[s]['mental_score']
+
+            # --- Step 1: SOCIAL weight - dominant ---
+            social_weight = wellbeing_weight * dominance_factor * 1000  # Base dominance
+            if social_score < 70:
+                social_weight *= social_boost_factor  # Amplify further if needed
+
+            # --- Step 2: Academic & Mental - minor penalties ---
+            # Lower weight if scores are high, to reduce their influence
+            academic_weight = 0.005 * penalty_factor
+            mental_weight = 0.005 * penalty_factor
+            if academic_score > 80:
+                academic_weight *= 0.01
+            if mental_score > 80:
+                mental_weight *= 0.01
+
+            # --- Step 3: Objective Terms ---
+            objective_terms.append(assign[(s, c)] * int(social_score * social_weight))
+            objective_terms.append(-assign[(s, c)] * int(academic_score * academic_weight))
+            objective_terms.append(-assign[(s, c)] * int(mental_score * mental_weight))
+
+    for u, v, relation, weight in enriched_links:
+        for c in classes:
+            same_class = model.NewBoolVar(f'same_class_{relation}_{u}_{v}_{c}')
+            model.AddMultiplicationEquality(same_class, [assign[(u, c)], assign[(v, c)]])
+            objective_terms.append(weight * same_class)
+
+    model.Maximize(sum(objective_terms))
+
+    solver = cp_model.CpSolver()
+    solver.parameters.max_time_in_seconds = 40
+    solver.parameters.num_search_workers = 8
+    status = solver.Solve(model)
+
+    allocation = []
+
+    if status in (cp_model.OPTIMAL, cp_model.FEASIBLE):
+        for s in students:
+            for c in classes:
+                if solver.BooleanValue(assign[(s, c)]):
+                    allocation.append((s, c))
+    else:
+        return None
+
+    return allocation
+
+# maximise academic score
+def cpsat_academic_allocation(df, n_classes, enriched_links, wellbeing_weight=1, dominance_factor=1000, penalty_factor=100, tolerance=0.1, social_boost_factor=2.0):
+    model = cp_model.CpModel()
+    n_students = len(df)
+    students = range(n_students)
+    classes = range(n_classes)
+
+    assign = {}
+    for s in students:
+        for c in classes:
+            assign[(s, c)] = model.NewBoolVar(f'student_{s}_class_{c}')
+
+    for s in students:
+        model.AddExactlyOne(assign[(s, c)] for c in classes)
+
+    base_size = n_students // n_classes
+    min_size = int(base_size * (1 - tolerance))
+    max_size = int(base_size * (1 + tolerance))
+    for c in classes:
+        model.Add(sum(assign[(s, c)] for s in students) >= min_size)
+        model.Add(sum(assign[(s, c)] for s in students) <= max_size)
+        
+    objective_terms = []
+
+    for s in students:
+        for c in classes:
+            # Student scores
+            social_score = df.iloc[s]['social_score']
+            academic_score = df.iloc[s]['academic_score']
+            mental_score = df.iloc[s]['mental_score']
+
+            academic_weight = wellbeing_weight * dominance_factor * 1000  # Base dominance
+            if academic_score < 70:
+                academic_weight *= social_boost_factor  # Amplify further if needed
+
+            # Lower weight if scores are high, to reduce their influence
+            social_weight = 0.005 * penalty_factor
+            mental_weight = 0.005 * penalty_factor
+            if social_score > 80:
+                social_weight *= 0.01
+            if mental_score > 80:
+                mental_weight *= 0.01
+
+            # --- Step 3: Objective Terms ---
+            objective_terms.append(-assign[(s, c)] * int(social_score * social_weight))
+            objective_terms.append(assign[(s, c)] * int(academic_score * academic_weight))
+            objective_terms.append(-assign[(s, c)] * int(mental_score * mental_weight))
+
+    for u, v, relation, weight in enriched_links:
+        for c in classes:
+            same_class = model.NewBoolVar(f'same_class_{relation}_{u}_{v}_{c}')
+            model.AddMultiplicationEquality(same_class, [assign[(u, c)], assign[(v, c)]])
+            objective_terms.append(weight * same_class)
+
+    model.Maximize(sum(objective_terms))
+
+    solver = cp_model.CpSolver()
+    solver.parameters.max_time_in_seconds = 40
+    solver.parameters.num_search_workers = 8
+    status = solver.Solve(model)
+
+    allocation = []
+
+    if status in (cp_model.OPTIMAL, cp_model.FEASIBLE):
+        for s in students:
+            for c in classes:
+                if solver.BooleanValue(assign[(s, c)]):
+                    allocation.append((s, c))
+    else:
+        return None
+
+    return allocation
+
+# max mental score
+def cpsat_mental_allocation(df, n_classes, enriched_links, wellbeing_weight=1, dominance_factor=1000, penalty_factor=100, tolerance=0.1, social_boost_factor=2.0):
+    model = cp_model.CpModel()
+    n_students = len(df)
+    students = range(n_students)
+    classes = range(n_classes)
+
+    assign = {}
+    for s in students:
+        for c in classes:
+            assign[(s, c)] = model.NewBoolVar(f'student_{s}_class_{c}')
+
+    for s in students:
+        model.AddExactlyOne(assign[(s, c)] for c in classes)
+
+    base_size = n_students // n_classes
+    min_size = int(base_size * (1 - tolerance))
+    max_size = int(base_size * (1 + tolerance))
+    for c in classes:
+        model.Add(sum(assign[(s, c)] for s in students) >= min_size)
+        model.Add(sum(assign[(s, c)] for s in students) <= max_size)
+        
+    objective_terms = []
+
+    for s in students:
+        for c in classes:
+            # Student scores
+            social_score = df.iloc[s]['social_score']
+            academic_score = df.iloc[s]['academic_score']
+            mental_score = df.iloc[s]['mental_score']
+
+            mental_weight = wellbeing_weight * dominance_factor * 1000  # Base dominance
+            if mental_score < 70:
+                mental_weight *= social_boost_factor  # Amplify further if needed
+
+            # Lower weight if scores are high, to reduce their influence
+            social_weight = 0.005 * penalty_factor
+            academic_weight = 0.005 * penalty_factor
+            if social_score > 80:
+                social_weight *= 0.01
+            if academic_score > 80:
+                academic_weight *= 0.01
+
+            # --- Step 3: Objective Terms ---
+            objective_terms.append(-assign[(s, c)] * int(social_score * social_weight))
+            objective_terms.append(-assign[(s, c)] * int(academic_score * academic_weight))
+            objective_terms.append(assign[(s, c)] * int(mental_score * mental_weight))
+
+    for u, v, relation, weight in enriched_links:
+        for c in classes:
+            same_class = model.NewBoolVar(f'same_class_{relation}_{u}_{v}_{c}')
+            model.AddMultiplicationEquality(same_class, [assign[(u, c)], assign[(v, c)]])
+            objective_terms.append(weight * same_class)
+
+    model.Maximize(sum(objective_terms))
+
+    solver = cp_model.CpSolver()
+    solver.parameters.max_time_in_seconds = 40
+    solver.parameters.num_search_workers = 8
+    status = solver.Solve(model)
+
+    allocation = []
+
+    if status in (cp_model.OPTIMAL, cp_model.FEASIBLE):
+        for s in students:
+            for c in classes:
+                if solver.BooleanValue(assign[(s, c)]):
+                    allocation.append((s, c))
+    else:
+        return None
+
+    return allocation
