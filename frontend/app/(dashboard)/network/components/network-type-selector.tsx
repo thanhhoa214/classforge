@@ -10,8 +10,9 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 
-interface NetworkTypeSelectorProps {
+export interface NetworkTypeSelectorProps {
   currentType: NetworkType;
+  onChange: (type: NetworkType) => void; // Add the onChange prop
 }
 
 const NETWORK_TYPE_LABELS: Record<NetworkType, string> = {
@@ -21,14 +22,18 @@ const NETWORK_TYPE_LABELS: Record<NetworkType, string> = {
   [NetworkType.DISRESPECT]: "Disrespect",
 };
 
-export function NetworkTypeSelector({ currentType }: NetworkTypeSelectorProps) {
+export function NetworkTypeSelector({ currentType, onChange }: NetworkTypeSelectorProps) {
   const router = useRouter();
   const searchParams = useSearchParams();
 
   const handleTypeChange = (value: NetworkType) => {
+    // Update the search param
     const params = new URLSearchParams(searchParams);
     params.set("type", value);
     router.push(`/network?${params.toString()}`);
+
+    // Inform the parent component
+    onChange(value); // <-- this ensures the UI state updates immediately
   };
 
   return (
@@ -46,3 +51,4 @@ export function NetworkTypeSelector({ currentType }: NetworkTypeSelectorProps) {
     </Select>
   );
 }
+
