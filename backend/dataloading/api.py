@@ -1,13 +1,14 @@
 import dotenv
 import pyvis
+import json
 import os
 from neo4j import GraphDatabase
 import pandas as pd
 
 class DB:
-    def __init__(self, driver=None):
+    def __init__(self):
         self.database = ""
-        self.driver: GraphDatabase.driver = driver
+        self.driver: GraphDatabase.driver = None
         self.cypher_path = os.path.join(os.path.dirname(__file__), "cypher")
         self.cache = {}
     
@@ -160,3 +161,4 @@ class DB:
         if not cypher:
             raise ValueError(f"No cypher for {node_type}.{query_type}")
         return self.query_to_dataframe(cypher, params)
+
