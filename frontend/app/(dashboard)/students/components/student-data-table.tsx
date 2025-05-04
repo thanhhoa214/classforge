@@ -1,3 +1,4 @@
+"use client";
 import {
   Table,
   TableBody,
@@ -6,160 +7,121 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import { StudentFilters } from "@/app/(dashboard)/students/student";
 import { getStudents } from "../../../actions/students";
-import { StudentActions } from "./student-actions";
-import {
-  Pagination,
-  PaginationContent,
-  PaginationEllipsis,
-  PaginationItem,
-  PaginationLink,
-  PaginationNext,
-  PaginationPrevious,
-} from "@/components/ui/pagination";
+import { useQuery } from "@tanstack/react-query";
+import { useState } from "react";
+import { StudentFilters, StudentFiltersType } from "./student-filters";
+import { ArrowRight, Loader2 } from "lucide-react";
+import { Button } from "@/components/ui/button";
+import ParticipantNetwork from "../../network/components/participant-network";
 
-interface StudentDataTableProps {
-  filters?: StudentFilters;
-  page?: number;
-}
-
-export async function StudentDataTable({
-  filters = {},
-  page = 1,
-}: StudentDataTableProps) {
-  const { students, totalPages, currentPage } = await getStudents(
-    filters,
-    page
-  );
-  const renderPageNumbers = () => {
-    const pages = [];
-    const maxPagesToShow = 5; // Adjust as needed
-
-    if (totalPages <= maxPagesToShow) {
-      for (let i = 1; i <= totalPages; i++) {
-        pages.push(
-          <PaginationItem key={i}>
-            <PaginationLink href={`?page=${i}`} isActive={i === currentPage}>
-              {i}
-            </PaginationLink>
-          </PaginationItem>
-        );
-      }
-    } else {
-      if (currentPage > 2) {
-        pages.push(
-          <PaginationItem key={1}>
-            <PaginationLink href="?page=1">1</PaginationLink>
-          </PaginationItem>
-        );
-      }
-      if (currentPage > 3) {
-        pages.push(
-          <PaginationItem key="ellipsis-prev">
-            <PaginationEllipsis />
-          </PaginationItem>
-        );
-      }
-
-      const startPage = Math.max(2, currentPage - 1);
-      const endPage = Math.min(totalPages - 1, currentPage + 1);
-
-      for (let i = startPage; i <= endPage; i++) {
-        pages.push(
-          <PaginationItem key={i}>
-            <PaginationLink href={`?page=${i}`} isActive={i === currentPage}>
-              {i}
-            </PaginationLink>
-          </PaginationItem>
-        );
-      }
-
-      if (currentPage < totalPages - 2) {
-        pages.push(
-          <PaginationItem key="ellipsis-next">
-            <PaginationEllipsis />
-          </PaginationItem>
-        );
-      }
-      if (currentPage < totalPages - 1) {
-        pages.push(
-          <PaginationItem key={totalPages}>
-            <PaginationLink href={`?page=${totalPages}`}>
-              {totalPages}
-            </PaginationLink>
-          </PaginationItem>
-        );
-      }
+export function StudentDataTable() {
+  const [filters, setFilters] = useState<StudentFiltersType>({});
+  const { isLoading, data } = useQuery({
+    queryKey: ["students", filters],
+    queryFn: async () => {
+      const { students } = await getStudents();
+      return students;
+    },
+    staleTime: Infinity,
+  });
+  const students = data?.filter((student) => {
+    if (
+      filters.house &&
+      student.house.toLowerCase() !== filters.house.toLowerCase()
+    ) {
+      return false;
     }
 
-    return pages;
-  };
-
+    if (filters.performanceRange) {
+      const performance = Number(student.perc_academic) ?? 0;
+      const { min, max } = filters.performanceRange;
+      if (!performance) return false;
+      if (performance < min || performance > max) return false;
+    }
+    if (
+      filters.search &&
+      ![student.email, student.first_name, student.last_name]
+        .join()
+        .includes(filters.search)
+    ) {
+      return false;
+    }
+    return true;
+  });
+  const [selectedId, setSelectedId] = useState<string>();
   return (
-    <div className="space-y-4">
-      <div className="border rounded-md">
-        <Table>
-          <TableHeader>
-            <TableRow>
-              <TableHead>Name</TableHead>
-              <TableHead>Email</TableHead>
-              <TableHead>Grade</TableHead>
-              <TableHead>Performance</TableHead>
-              <TableHead className="w-[100px]">Actions</TableHead>
-            </TableRow>
-          </TableHeader>
-          <TableBody>
-            {students.map((student) => (
-              <TableRow key={student.id}>
-                <TableCell>{student.name}</TableCell>
-                <TableCell>{student.email}</TableCell>
-                <TableCell>{student.grade}</TableCell>
-                <TableCell>
-                  {student.performance?.toFixed(1) ?? "N/A"}
-                </TableCell>
-                <TableCell>
-                  <StudentActions student={student} />
-                </TableCell>
+    <div className="flex gap-4">
+      <div className="space-y-4 grow">
+        <StudentFilters filters={filters} onFiltersChange={setFilters} />
+        <div className="border rounded-md">
+          <Table>
+            <TableHeader>
+              <TableRow>
+                <TableHead>Participant ID</TableHead>
+                <TableHead>Name</TableHead>
+                <TableHead>Email</TableHead>
+                <TableHead>Grade</TableHead>
+                <TableHead>House</TableHead>
+                <TableHead>Attendance</TableHead>
+                <TableHead>Academic</TableHead>
+                <TableHead>Effort</TableHead>
+                <TableHead>Actions</TableHead>
               </TableRow>
-            ))}
-          </TableBody>
-        </Table>
+            </TableHeader>
+            <TableBody>
+              {isLoading ? (
+                <TableRow>
+                  <TableCell colSpan={9} className="text-center">
+                    <span className="inline-flex flex-col items-center justify-center gap-1">
+                      <Loader2 className="animate-spin" />
+                      <span className="text-sm text-muted-foreground">
+                        Loading students...
+                      </span>
+                    </span>
+                  </TableCell>
+                </TableRow>
+              ) : students?.length ? (
+                students.map((student) => (
+                  <TableRow key={student.participant_id}>
+                    <TableCell>{student.participant_id}</TableCell>
+                    <TableCell>
+                      {student.first_name} {student.last_name}
+                    </TableCell>
+                    <TableCell>{student.email}</TableCell>
+                    <TableCell>{student.completeyears}</TableCell>
+                    <TableCell>{student.house}</TableCell>
+                    <TableCell>{student.attendance}</TableCell>
+                    <TableCell>{student.perc_academic ?? "N/A"}</TableCell>
+                    <TableCell>{student.perc_effort}</TableCell>
+                    <TableCell>
+                      <Button
+                        variant="secondary"
+                        size={"iconSm"}
+                        onClick={() => {
+                          setSelectedId(student.participant_id);
+                        }}
+                      >
+                        <ArrowRight />
+                      </Button>
+                    </TableCell>
+                  </TableRow>
+                ))
+              ) : (
+                <TableRow>
+                  <TableCell colSpan={9} className="text-center">
+                    No students found
+                  </TableCell>
+                </TableRow>
+              )}
+            </TableBody>
+          </Table>
+        </div>
       </div>
-
-      <div className="flex justify-between items-center">
-        <Pagination>
-          <PaginationContent>
-            <PaginationItem>
-              <PaginationPrevious
-                href={currentPage > 1 ? `?page=${currentPage - 1}` : "#"}
-                aria-disabled={currentPage === 1}
-                className={
-                  currentPage === 1
-                    ? "text-muted-foreground pointer-events-none"
-                    : ""
-                }
-              />
-            </PaginationItem>
-
-            {renderPageNumbers()}
-
-            <PaginationItem>
-              <PaginationNext
-                href={
-                  currentPage < totalPages ? `?page=${currentPage + 1}` : "#"
-                }
-                aria-disabled={currentPage === totalPages}
-                className={
-                  currentPage === totalPages
-                    ? "text-muted-foreground pointer-events-none"
-                    : ""
-                }
-              />
-            </PaginationItem>
-          </PaginationContent>
-        </Pagination>
-      </div>
+      <ParticipantNetwork
+        participantIds={selectedId ? [selectedId] : []}
+        className="flex-col w-1/4"
+      />
     </div>
   );
 }

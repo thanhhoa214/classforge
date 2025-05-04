@@ -9,8 +9,7 @@ def main():
     # loaded_sheet2 = ["responses"]
     dl = DataLoader(db, folder = 'data',loaded_sheet = loaded_sheet
                     , loaded_relationship= loaded_rela)
-    dl.load_test_data("test_data_load.xlsx")
-
+    df = dl.load_test_data("Student Survey - Jan.xlsx")
     dl.agent_sample_load()
     
 if __name__ == "__main__":

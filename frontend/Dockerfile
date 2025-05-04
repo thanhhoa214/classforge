@@ -9,11 +9,11 @@ RUN npm install --force
 # Copy the rest of the application
 COPY . .
 
-# Build the application
-RUN npm run build
+# # Build the application
+# RUN npm run build
 
 # Expose the port the app runs on
 EXPOSE 3000
 
 # Start the application
-CMD ["npm", "start"] 
+CMD ["npm", "run", "dev"] 
