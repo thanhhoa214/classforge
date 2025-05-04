@@ -1,6 +1,5 @@
 "use client";
 
-import { useRouter, useSearchParams } from "next/navigation";
 import { Input } from "@/components/ui/input";
 import {
   Select,
@@ -10,78 +9,65 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { Button } from "@/components/ui/button";
-import type { StudentFilters } from "@/app/(dashboard)/students/student";
 
-export function StudentFilters() {
-  const router = useRouter();
-  const searchParams = useSearchParams();
+export interface StudentFiltersType {
+  house?: string;
+  performanceRange?: {
+    min: number;
+    max: number;
+  };
+  search?: string;
+}
 
-  const currentFilters: StudentFilters = {
-    search: searchParams.get("search") ?? undefined,
-    grade: searchParams.get("grade") ?? undefined,
-    performanceRange: searchParams.get("performanceRange")
-      ? {
-          min: parseInt(searchParams.get("performanceRange")!.split("-")[0]),
-          max: parseInt(searchParams.get("performanceRange")!.split("-")[1]),
-        }
-      : undefined,
+export function StudentFilters({
+  filters,
+  onFiltersChange,
+}: {
+  filters: StudentFiltersType;
+  onFiltersChange: (filters: StudentFiltersType) => void;
+}) {
+  const handleFilterChange = (newFilters: Partial<StudentFiltersType>) => {
+    const updatedFilters = { ...filters, ...newFilters };
+    onFiltersChange(updatedFilters);
   };
 
-  const handleFilterChange = (newFilters: Partial<StudentFilters>) => {
-    const params = new URLSearchParams(searchParams);
-
-    if (newFilters.search) {
-      params.set("search", newFilters.search);
-    } else {
-      params.delete("search");
-    }
-
-    if (newFilters.grade) {
-      params.set("grade", newFilters.grade);
-    } else {
-      params.delete("grade");
-    }
-
-    if (newFilters.performanceRange) {
-      params.set(
-        "performanceRange",
-        `${newFilters.performanceRange.min}-${newFilters.performanceRange.max}`
-      );
-    } else {
-      params.delete("performanceRange");
-    }
-
-    router.push(`/students?${params.toString()}`);
-  };
+  const houses = [
+    "Redwood",
+    "Vanguard",
+    "Astral",
+    "Phoenix",
+    "Falcon",
+    "Griffin",
+  ];
 
   return (
     <div className="flex gap-4 items-center">
       <div className="flex-1">
         <Input
           placeholder="Search students..."
-          value={currentFilters.search ?? ""}
+          value={filters.search ?? ""}
           onChange={(e) => handleFilterChange({ search: e.target.value })}
         />
       </div>
       <Select
-        value={currentFilters.grade}
-        onValueChange={(value) => handleFilterChange({ grade: value })}
+        value={filters.house}
+        onValueChange={(value) => handleFilterChange({ house: value })}
       >
         <SelectTrigger className="w-[180px]">
-          <SelectValue placeholder="Select grade" />
+          <SelectValue placeholder="House" />
         </SelectTrigger>
         <SelectContent>
-          <SelectItem value="A">Grade A</SelectItem>
-          <SelectItem value="B">Grade B</SelectItem>
-          <SelectItem value="C">Grade C</SelectItem>
-          <SelectItem value="D">Grade D</SelectItem>
-          <SelectItem value="F">Grade F</SelectItem>
+          {houses.map((house) => (
+            <SelectItem key={house} value={house}>
+              {house}
+            </SelectItem>
+          ))}
         </SelectContent>
       </Select>
       <Select
         value={
-          currentFilters.performanceRange
-            ? `${currentFilters.performanceRange.min}-${currentFilters.performanceRange.max}`
+          filters.performanceRange
+            ? `${filters.performanceRange.min}-${filters.performanceRange.max}`
             : undefined
         }
         onValueChange={(value) => {
@@ -101,12 +87,7 @@ export function StudentFilters() {
           <SelectItem value="85-100">85-100%</SelectItem>
         </SelectContent>
       </Select>
-      <Button
-        variant="outline"
-        onClick={() => {
-          router.push("/students");
-        }}
-      >
+      <Button variant="outline" onClick={() => onFiltersChange({})}>
         Clear Filters
       </Button>
     </div>

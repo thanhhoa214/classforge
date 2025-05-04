@@ -1,7 +1,7 @@
 "use client";
 
 import { useRouter, useSearchParams } from "next/navigation";
-import { NetworkType } from "@prisma/client";
+import { NetworkType } from "@/lib/neo4j";
 import {
   Select,
   SelectContent,
@@ -16,13 +16,18 @@ export interface NetworkTypeSelectorProps {
 }
 
 const NETWORK_TYPE_LABELS: Record<NetworkType, string> = {
-  [NetworkType.FRIENDSHIP]: "Friendship",
-  [NetworkType.ADVICE]: "Advice",
-  [NetworkType.INFLUENCE]: "Influence",
-  [NetworkType.DISRESPECT]: "Disrespect",
+  [NetworkType.has_friend]: "Friendship",
+  [NetworkType.has_influence]: "Influence",
+  [NetworkType.get_advice]: "Advice",
+  [NetworkType.has_feedback]: "Feedback",
+  [NetworkType.spend_more_time]: "Spend More Time",
+  [NetworkType.disrespect]: "Disrespect",
 };
 
-export function NetworkTypeSelector({ currentType, onChange }: NetworkTypeSelectorProps) {
+export function NetworkTypeSelector({
+  currentType,
+  onChange,
+}: NetworkTypeSelectorProps) {
   const router = useRouter();
   const searchParams = useSearchParams();
 
@@ -51,4 +56,3 @@ export function NetworkTypeSelector({ currentType, onChange }: NetworkTypeSelect
     </Select>
   );
 }
-

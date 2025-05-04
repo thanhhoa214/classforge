@@ -1,5 +1,6 @@
 import { Suspense } from "react";
 import NetworkPage from "./components/network-page";
+import Neo4j from "./components/neo4j";
 
 export default function Page() {
   return (
@@ -16,6 +17,7 @@ export default function Page() {
           </div>
         }
       >
+        <Neo4j />
         <NetworkPage />
       </Suspense>
     </>

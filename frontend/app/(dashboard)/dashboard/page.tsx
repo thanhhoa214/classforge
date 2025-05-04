@@ -10,7 +10,7 @@ const metrics = [
   },
   {
     title: "Network Density",
-    value: "72%",
+    value: "73%",
     icon: Network,
     description: "Average connection density",
   },
