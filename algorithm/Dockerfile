@@ -9,7 +9,9 @@ RUN apt-get update && apt-get install -y \
 
 # Install Python dependencies
 RUN pip install torch --index-url https://download.pytorch.org/whl/cpu
-RUN pip install pandas numpy scikit-learn matplotlib torch-scatter torch-sparse torch-geometric ortools networkx seaborn
+RUN pip install torch-scatter torch-sparse torch-geometric ortools
+RUN pip install pandas numpy scikit-learn matplotlib networkx seaborn openpyxl
+RUN pip install flask
 
 # Copy the rest of the application
 COPY . .
@@ -18,4 +20,4 @@ COPY . .
 ENV PYTHONPATH=/app
 
 # Command to run the application
-CMD ["python", "execution.py"] 
+CMD ["python", "main.py"] 
