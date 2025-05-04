@@ -11,7 +11,10 @@ RUN apt-get update && apt-get install -y \
 RUN pip install torch --index-url https://download.pytorch.org/whl/cpu
 RUN pip install torch-scatter torch-sparse torch-geometric ortools
 RUN pip install pandas numpy scikit-learn matplotlib networkx seaborn openpyxl
-RUN pip install flask
+COPY requirements.txt .
+
+# Install Python dependencies
+RUN pip install --no-cache-dir -r requirements.txt
 
 # Copy the rest of the application
 COPY . .

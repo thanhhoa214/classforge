@@ -13,7 +13,11 @@ interface NetworkGraphProps {
   onNodeHover: (nodeId: string | null) => void;
 }
 
-export function NetworkGraph({ data, onNodeClick, onNodeHover }: NetworkGraphProps) {
+export function NetworkGraph({
+  data,
+  onNodeClick,
+  onNodeHover,
+}: NetworkGraphProps) {
   const sigma = useSigma();
   const loadGraph = useLoadGraph();
 
@@ -44,7 +48,10 @@ export function NetworkGraph({ data, onNodeClick, onNodeHover }: NetworkGraphPro
     data.edges.forEach((edge) => {
       if (graph.hasNode(edge.source) && graph.hasNode(edge.target)) {
         // Check if edge already exists to prevent errors
-        if (!graph.hasEdge(edge.source, edge.target) && !graph.hasEdge(edge.target, edge.source)) {
+        if (
+          !graph.hasEdge(edge.source, edge.target) &&
+          !graph.hasEdge(edge.target, edge.source)
+        ) {
           try {
             graph.addEdge(edge.source, edge.target, {
               size: edge.size,
@@ -53,11 +60,16 @@ export function NetworkGraph({ data, onNodeClick, onNodeHover }: NetworkGraphPro
               originalData: edge,
             });
           } catch (e) {
-            console.warn(`Could not add edge ${edge.id} between ${edge.source} and ${edge.target}:`, e);
+            console.warn(
+              `Could not add edge ${edge.id} between ${edge.source} and ${edge.target}:`,
+              e
+            );
           }
         }
       } else {
-        console.warn(`Skipping edge ${edge.id} because source or target node does not exist.`);
+        console.warn(
+          `Skipping edge ${edge.id} because source or target node does not exist.`
+        );
       }
     });
 
@@ -70,7 +82,6 @@ export function NetworkGraph({ data, onNodeClick, onNodeHover }: NetworkGraphPro
     //   sigma.startForceAtlas2({ iterationsPerRender: 1, linLogMode: true });
     //   setTimeout(() => sigma.stopForceAtlas2(), 3000); // Run for 3 seconds
     // }
-
   }, [data, loadGraph, sigma]); // Added sigma dependency
 
   // Effect for registering event listeners using sigma instance
@@ -85,11 +96,11 @@ export function NetworkGraph({ data, onNodeClick, onNodeHover }: NetworkGraphPro
       onNodeClick(event.node);
     };
     const handleEnterNode = (event: { node: string }) => {
-      console.log('Enter Node (Graph Component):', event.node); // DEBUG LOG
+      console.log("Enter Node (Graph Component):", event.node); // DEBUG LOG
       onNodeHover(event.node);
       if (container) container.style.cursor = "pointer";
     };
-    const handleLeaveNode = (event: { node: string }) => {
+    const handleLeaveNode = () => {
       onNodeHover(null);
       if (container) container.style.cursor = "";
     };
@@ -113,7 +124,6 @@ export function NetworkGraph({ data, onNodeClick, onNodeHover }: NetworkGraphPro
       // Reset cursor on cleanup
       if (container) container.style.cursor = "";
     };
-
   }, [sigma, onNodeClick, onNodeHover]); // Dependencies: sigma instance and callbacks
 
   // Effect for highlighting selected/hovered nodes (optional)

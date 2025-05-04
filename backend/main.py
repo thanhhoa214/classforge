@@ -1,5 +1,5 @@
-from api import *
-from dataloader import DataLoader
+from dataloading.api import *
+from dataloading.dataloader import DataLoader
 
 def main():
     db = DB()

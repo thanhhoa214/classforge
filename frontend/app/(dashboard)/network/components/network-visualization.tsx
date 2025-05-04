@@ -18,7 +18,11 @@ interface NetworkVisualizationProps {
   onNodeHover: (nodeId: string | null) => void; // Callback for node hover
 }
 
-export function NetworkVisualization({ data, onNodeClick, onNodeHover }: NetworkVisualizationProps) {
+export function NetworkVisualization({
+  data,
+  onNodeClick,
+  onNodeHover,
+}: NetworkVisualizationProps) {
   return (
     <div className="w-full h-full">
       <SigmaContainer
@@ -27,15 +31,12 @@ export function NetworkVisualization({ data, onNodeClick, onNodeHover }: Network
           allowInvalidContainer: true,
         }}
       >
-        <NetworkGraph 
-          data={data} 
-          onNodeClick={onNodeClick} 
-          onNodeHover={onNodeHover} 
+        <NetworkGraph
+          data={data}
+          onNodeClick={onNodeClick}
+          onNodeHover={onNodeHover}
         />
       </SigmaContainer>
     </div>
   );
 }
-
-// Need to import Graph constructor if NetworkGraph uses it directly
-import Graph from "graphology";
