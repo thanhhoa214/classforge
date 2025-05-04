@@ -1,6 +1,6 @@
 import os
 import pandas as pd
-from api import DB
+from dataloading.api import DB
 from datetime import datetime
 import logging
 
@@ -17,7 +17,7 @@ logger = logging.getLogger(__name__)
 class DataLoader:
     def __init__(self, db, folder = "data", loaded_sheet = ["participants", "responses"]
                  , loaded_relationship = ["net_0_friends"]):
-        self.folder = folder
+        self.folder = os.path.join(os.path.dirname(__file__), folder)
         self.db: DB = db
         self.loaded_sheet = loaded_sheet
         self.loaded_relationship = loaded_relationship
@@ -722,3 +722,31 @@ class DataLoader:
         agent_data["relationships"] = self.load_agent_relationship_df(last_run_id)
 
         return agent_data
+    
+    def agent_sample_load(self):
+
+        last_pr = self.get_last_process_run()
+        if last_pr == 2:
+            logger.info("Agent data already loaded")
+            return
+
+        test_df = pd.read_excel(os.path.join(self.folder,"test_df/df.xlsx"))
+        predicted_df = pd.read_excel(os.path.join(self.folder, "test_df/predicted_links.xlsx"))
+        y_pred_df = pd.read_excel(os.path.join(self.folder, "test_df/Y_pred_df.xlsx"))
+
+
+        test_df.columns = map(str.lower, test_df.columns)
+        test_df = self.fill_nan_values(test_df)
+        test_df['run_id'] = 2
+        self.create_process_run(2)
+        self.create_data_metric_df(test_df, 2)
+
+        y_pred_df.columns = map(str.lower, y_pred_df.columns)
+        y_pred_df = self.fill_nan_values(y_pred_df)
+        self.create_new_survey_data(y_pred_df, 2)
+
+        predicted_df = self.fill_nan_values(predicted_df)
+        predicted_df.columns = map(str.lower, predicted_df.columns)
+        self.create_new_rela_table(predicted_df, 2)
+
+        logger.info("Agent data loaded successfully")
