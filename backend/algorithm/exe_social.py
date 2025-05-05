@@ -15,6 +15,8 @@ from node_embeddings import *
 from multilink_prediction import *
 from cp_sat import *
 from visualise import *
+from utils import set_seed
+set_seed(42)
 
 
 #----------------------------LOAD DATA----------------------------#
