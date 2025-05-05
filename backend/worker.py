@@ -7,7 +7,8 @@ import os
 listen = ['default']
 print(os.getenv("REDIS_HOST", "localhost"))
 redis_conn = Redis(
-    host=os.getenv("REDIS_HOST", "localhost"),
+    # host=os.getenv("REDIS_HOST", "localhost"),
+    host="redis",
     port=6379
 )
 
