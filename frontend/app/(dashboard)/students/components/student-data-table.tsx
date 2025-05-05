@@ -7,24 +7,46 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import { getStudents } from "../../../actions/students";
 import { useQuery } from "@tanstack/react-query";
 import { useState } from "react";
 import { StudentFilters, StudentFiltersType } from "./student-filters";
-import { ArrowRight, Loader2 } from "lucide-react";
-import { Button } from "@/components/ui/button";
-import ParticipantNetwork from "../../network/components/participant-network";
+import { Loader2 } from "lucide-react";
+import ParticipantNetwork from "./participant-network";
+import { useProcessId } from "@/hooks/useProcessId";
+import { MetricNode, neo4jDriver, ParticipantNode } from "@/lib/neo4j";
+import { formatNumber } from "@/lib/utils";
 
 export function StudentDataTable() {
+  const { processId } = useProcessId();
+
   const [filters, setFilters] = useState<StudentFiltersType>({});
   const { isLoading, data } = useQuery({
-    queryKey: ["students", filters],
+    queryKey: ["students", processId],
     queryFn: async () => {
-      const { students } = await getStudents();
+      const result = await neo4jDriver.executeQuery(`
+        MATCH (pr:ProcessRun)-[]-(m:Metric)-[:has_metric {}]-(p:Participant)
+        WHERE pr.id = ${processId}
+        RETURN m, p
+    `);
+      const students = result.records.map((record) => {
+        const participant = (record.get("p") as ParticipantNode).properties;
+        const metric = (record.get("m") as MetricNode).properties;
+        return {
+          house: participant.house,
+          name: `${participant.first_name} ${participant.last_name}`,
+          participantId: participant.participant_id.low,
+          academicScore: metric.academic_score,
+          mentalScore: metric.mental_score,
+          socialScore: metric.social_score,
+        };
+      });
+
       return students;
     },
     staleTime: Infinity,
+    enabled: !!processId,
   });
+
   const students = data?.filter((student) => {
     if (
       filters.house &&
@@ -34,22 +56,18 @@ export function StudentDataTable() {
     }
 
     if (filters.performanceRange) {
-      const performance = Number(student.perc_academic) ?? 0;
+      const performance = Number(student.academicScore) ?? 0;
       const { min, max } = filters.performanceRange;
       if (!performance) return false;
       if (performance < min || performance > max) return false;
     }
-    if (
-      filters.search &&
-      ![student.email, student.first_name, student.last_name]
-        .join()
-        .includes(filters.search)
-    ) {
+    if (filters.search && ![student.name].join().includes(filters.search)) {
       return false;
     }
     return true;
   });
-  const [selectedId, setSelectedId] = useState<string>();
+  const [selectedId, setSelectedId] = useState<number>();
+
   return (
     <div className="flex gap-4">
       <div className="space-y-4 grow">
@@ -60,19 +78,16 @@ export function StudentDataTable() {
               <TableRow>
                 <TableHead>Participant ID</TableHead>
                 <TableHead>Name</TableHead>
-                <TableHead>Email</TableHead>
-                <TableHead>Grade</TableHead>
                 <TableHead>House</TableHead>
-                <TableHead>Attendance</TableHead>
-                <TableHead>Academic</TableHead>
-                <TableHead>Effort</TableHead>
-                <TableHead>Actions</TableHead>
+                <TableHead className="text-right">Academic Score</TableHead>
+                <TableHead className="text-right">Mental Score</TableHead>
+                <TableHead className="text-right">Social Score</TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
               {isLoading ? (
                 <TableRow>
-                  <TableCell colSpan={9} className="text-center">
+                  <TableCell colSpan={6} className="text-center">
                     <span className="inline-flex flex-col items-center justify-center gap-1">
                       <Loader2 className="animate-spin" />
                       <span className="text-sm text-muted-foreground">
@@ -83,33 +98,28 @@ export function StudentDataTable() {
                 </TableRow>
               ) : students?.length ? (
                 students.map((student) => (
-                  <TableRow key={student.participant_id}>
-                    <TableCell>{student.participant_id}</TableCell>
-                    <TableCell>
-                      {student.first_name} {student.last_name}
-                    </TableCell>
-                    <TableCell>{student.email}</TableCell>
-                    <TableCell>{student.completeyears}</TableCell>
+                  <TableRow
+                    key={student.participantId}
+                    className="cursor-pointer"
+                    onClick={() => setSelectedId(student.participantId)}
+                  >
+                    <TableCell>{student.participantId}</TableCell>
+                    <TableCell>{student.name}</TableCell>
                     <TableCell>{student.house}</TableCell>
-                    <TableCell>{student.attendance}</TableCell>
-                    <TableCell>{student.perc_academic ?? "N/A"}</TableCell>
-                    <TableCell>{student.perc_effort}</TableCell>
-                    <TableCell>
-                      <Button
-                        variant="secondary"
-                        size={"iconSm"}
-                        onClick={() => {
-                          setSelectedId(student.participant_id);
-                        }}
-                      >
-                        <ArrowRight />
-                      </Button>
+                    <TableCell className="text-right">
+                      {formatNumber(student.academicScore)}
+                    </TableCell>
+                    <TableCell className="text-right">
+                      {formatNumber(student.mentalScore)}
+                    </TableCell>
+                    <TableCell className="text-right">
+                      {formatNumber(student.socialScore)}
                     </TableCell>
                   </TableRow>
                 ))
               ) : (
                 <TableRow>
-                  <TableCell colSpan={9} className="text-center">
+                  <TableCell colSpan={6} className="text-center">
                     No students found
                   </TableCell>
                 </TableRow>

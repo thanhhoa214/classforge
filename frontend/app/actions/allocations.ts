@@ -9,6 +9,12 @@ import {
 import { prisma } from "@/lib/prisma";
 import { Preset } from "@prisma/client";
 import { ComparisonResult } from "../(dashboard)/allocations/compare/components/preset-comparison";
+import { neo4jDriver } from "@/lib/neo4j";
+
+export async function getProcesses() {
+  const query = "MATCH (n:ProcessRun) RETURN n ORDER BY n.id DESC";
+  return neo4jDriver.executeQuery(query);
+}
 
 export async function generateAllocation(
   config: Preset["config"]

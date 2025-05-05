@@ -35,7 +35,7 @@ export function NetworkVisualization({
       graph.addNode(node.id, {
         x: node.x,
         y: node.y,
-        size: 3,
+        size: 5,
         label: node.label,
         color: node.color,
       });
@@ -117,15 +117,7 @@ const GraphEvents: React.FC<{
   const registerEvents = useRegisterEvents();
 
   useEffect(() => {
-    // Register the events
-    registerEvents({
-      // node events
-      clickNode: (event) => {
-        console.log("Node clicked:", event.node);
-
-        onNodeClick?.(event.node);
-      },
-    });
+    registerEvents({ clickNode: (event) => onNodeClick?.(event.node) });
   }, [registerEvents]);
 
   return null;

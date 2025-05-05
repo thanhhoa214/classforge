@@ -1,5 +1,3 @@
-"use server";
-
 import {
   neo4jDriver,
   NetworkType,
@@ -8,7 +6,7 @@ import {
 } from "@/lib/neo4j";
 
 export interface NetworkNode {
-  id: string;
+  id: number;
   label: string;
   size: number;
   color: string;
@@ -18,8 +16,8 @@ export interface NetworkNode {
 
 export interface NetworkEdge {
   id: string;
-  source: string;
-  target: string;
+  source: number;
+  target: number;
   label?: string;
   size: number;
   color: string;
@@ -41,19 +39,20 @@ const NODE_COLORS: Record<NetworkType, string> = {
 };
 
 export async function getNeo4jData(
-  participantIds: string[]
+  processId: number,
+  participantIds: number[]
 ): Promise<NetworkData> {
   const participantIdsStr =
-    "[" + participantIds.map((id) => `"${id}"`).join(", ") + "]";
-
-  const query = `MATCH (p1:Participant)-[r]-(p2:Participant) WHERE p1.participant_id in ${participantIdsStr} OR p2.participant_id in ${participantIdsStr} RETURN p1, r, p2`;
+    "[" + participantIds.map((id) => `${id}`).join(", ") + "]";
+  const query = `MATCH (p1:Participant)-[r]->(p2:Participant) WHERE r.run_id = ${processId} and p1.participant_id in ${participantIdsStr} OR p2.participant_id in ${participantIdsStr} RETURN p1, r, p2`;
   const result = await neo4jDriver.executeQuery(query);
+  console.log(result);
 
   const nodes: NetworkNode[] = [];
   const edges: NetworkEdge[] = [];
 
   const isSelectedParticipant = (node: ParticipantNode) =>
-    participantIds.includes(node.properties.participant_id);
+    participantIds.includes(node.properties.participant_id.low);
 
   for (const record of result.records) {
     const node1 = record.get("p1") as ParticipantNode;
@@ -63,12 +62,12 @@ export async function getNeo4jData(
     const type = relationship.type;
     const color = NODE_COLORS[type];
     const participantColor = "#111111";
-    const nonParticipantColor = "#cccccc";
+    const nonParticipantColor = "#1a4068";
 
     // Check if nodes already exist to avoid duplicates
-    if (!nodes.some((n) => n.id === node1.properties.participant_id)) {
+    if (!nodes.some((n) => n.id === node1.properties.participant_id.low)) {
       nodes.push({
-        id: node1.properties.participant_id,
+        id: node1.properties.participant_id.low,
         label: `${node1.properties.first_name} (${node1.properties.last_name})`,
         size: 1,
         color: isSelectedParticipant(node1)
@@ -79,9 +78,9 @@ export async function getNeo4jData(
       });
     }
 
-    if (!nodes.some((n) => n.id === node2.properties.participant_id)) {
+    if (!nodes.some((n) => n.id === node2.properties.participant_id.low)) {
       nodes.push({
-        id: node2.properties.participant_id,
+        id: node2.properties.participant_id.low,
         label: `${node2.properties.first_name} (${node2.properties.last_name})`,
         size: 1,
         color: isSelectedParticipant(node2)
@@ -95,8 +94,8 @@ export async function getNeo4jData(
     // Create edges
     edges.push({
       id: relationship.elementId,
-      source: node1.properties.participant_id,
-      target: node2.properties.participant_id,
+      source: node1.properties.participant_id.low,
+      target: node2.properties.participant_id.low,
       size: 1,
       color: `${color}`,
       type: type,

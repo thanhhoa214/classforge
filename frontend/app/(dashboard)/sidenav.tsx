@@ -16,7 +16,6 @@ import { cn } from "@/lib/utils";
 import {
   LayoutDashboard,
   Users,
-  Network,
   GraduationCap,
   Settings,
   HelpCircle,
@@ -35,11 +34,6 @@ const routes = [
     title: "Student Data",
     href: "/students",
     icon: Users,
-  },
-  {
-    title: "Network Analysis",
-    href: "/network",
-    icon: Network,
   },
   {
     title: "Allocations",

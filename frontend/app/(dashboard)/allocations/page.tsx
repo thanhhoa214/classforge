@@ -13,7 +13,7 @@ export default function AllocationsPage() {
       <div className="mb-8">
         <h1 className="text-2xl font-bold">Classroom Allocation Generator</h1>
         <p className="text-muted-foreground mt-2">
-          Generate optimal classroom allocations using advanced algorithms.
+          Generate optimal classroom allocations using our advanced algorithms.
         </p>
       </div>
 

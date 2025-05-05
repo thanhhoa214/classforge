@@ -78,7 +78,7 @@ export function StudentFilters({
         }}
       >
         <SelectTrigger className="w-[180px]">
-          <SelectValue placeholder="Performance range" />
+          <SelectValue placeholder="Academic range" />
         </SelectTrigger>
         <SelectContent>
           <SelectItem value="0-50">0-50%</SelectItem>

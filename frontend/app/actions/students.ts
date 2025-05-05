@@ -1,5 +1,3 @@
-"use server";
-
 import { neo4jDriver, ParticipantNode } from "@/lib/neo4j";
 
 export async function getStudents() {

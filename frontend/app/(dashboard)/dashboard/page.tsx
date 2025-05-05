@@ -1,5 +1,6 @@
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Network, Users, GraduationCap, BarChart3 } from "lucide-react";
+import Processes from "../allocations/components/processes";
 
 const metrics = [
   {
@@ -66,9 +67,7 @@ export default function DashboardPage() {
             <CardTitle>Recent Allocations</CardTitle>
           </CardHeader>
           <CardContent>
-            <p className="text-sm text-muted-foreground">
-              No recent allocations to display.
-            </p>
+            <Processes />
           </CardContent>
         </Card>
 

@@ -6,6 +6,7 @@ import { useQuery } from "@tanstack/react-query";
 import { Loader2, MousePointer2Icon } from "lucide-react";
 import { NetworkType } from "@/lib/neo4j";
 import { cn } from "@/lib/utils";
+import { useProcessId } from "@/hooks/useProcessId";
 
 const NetworkVisualization = dynamic(
   () =>
@@ -14,7 +15,7 @@ const NetworkVisualization = dynamic(
 );
 
 export interface ParticipantNetworkProps {
-  participantIds: string[];
+  participantIds: number[];
   className?: string;
 }
 
@@ -31,13 +32,14 @@ export default function ParticipantNetwork({
   participantIds,
   className,
 }: ParticipantNetworkProps) {
+  const { processId } = useProcessId();
   const {
     isLoading,
     data: networkData,
     error,
   } = useQuery({
     queryKey: ["networkData", participantIds],
-    queryFn: () => getNeo4jData(participantIds),
+    queryFn: () => getNeo4jData(processId || 2, participantIds),
     refetchOnWindowFocus: false,
     enabled: !!participantIds.length,
   });
