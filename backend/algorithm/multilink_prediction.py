@@ -6,7 +6,8 @@ import torch.optim as optim
 from sklearn.model_selection import train_test_split
 import random
 import numpy as np
-
+from utils import set_seed
+set_seed(42)
 
 class MultilabelLinkModel(nn.Module):
     def __init__(self, input_dim, hidden_dim, num_classes, dropout=0.1):
