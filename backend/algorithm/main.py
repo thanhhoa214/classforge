@@ -1,6 +1,7 @@
 from execution import execute_algorithm
 from concurrent.futures import ThreadPoolExecutor
-
+from utils import set_seed
+set_seed(42)
 def main():
     file_name = 'test_data_1.xlsx'
 
