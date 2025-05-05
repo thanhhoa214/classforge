@@ -1,5 +1,4 @@
 import dotenv
-import pyvis
 import json
 import os
 from neo4j import GraphDatabase
@@ -66,25 +65,6 @@ class DB:
             print("Failed to query: ", e)
 
         return records, summary, keys
-
-
-    def visualize_result(self, query_graph, nodes_text_properties):
-        visual_graph = pyvis.network.Network()
-
-        for node in query_graph.nodes:
-            node_label = list(node.labels)[0]
-            node_text = node[nodes_text_properties[node_label]]
-            visual_graph.add_node(node.element_id, node_text, group=node_label)
-
-        for relationship in query_graph.relationships:
-            visual_graph.add_edge(
-                relationship.start_node.element_id,
-                relationship.end_node.element_id,
-                title=relationship.type
-            )
-
-        visual_graph.show('network.html', notebook=False)
-
     
     def load_cypher(self, node_type = None, query_type = None, cypher_file_path = None):
         print(f"Loading cypher for {node_type} with operation {query_type}")
@@ -162,3 +142,10 @@ class DB:
             raise ValueError(f"No cypher for {node_type}.{query_type}")
         return self.query_to_dataframe(cypher, params)
 
+
+    # 1. function for route getting latest process id
+
+    # 2. Route function for metrics of a process id
+
+
+    # 3. Each Route function for getting  statistic of all platforms (participant count, process count, relationship count, ...)

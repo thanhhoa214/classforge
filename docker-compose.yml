@@ -1,4 +1,12 @@
 services:
+  redis:
+    image: redis:6-alpine
+    container_name: classforge-redis
+    ports:
+      - "6379:6379"
+    volumes:
+      - ./redis-data:/data
+
   neo4j:
     image: neo4j:latest
     ports:
@@ -36,6 +44,23 @@ services:
         condition: service_healthy
     networks:
       - classforge-network
+  
+  worker:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    container_name: classforge-worker
+    depends_on:
+      - redis
+      - backend
+    environment:
+      - REDIS_HOST=redis
+      - PYTHONPATH=/app
+    volumes:
+      - ./backend:/app
+    networks:
+      - classforge-network
+    command: ["python", "worker.py"]
 
   frontend:
     build:

@@ -10,29 +10,44 @@ from sklearn.multioutput import MultiOutputRegressor
 import random
 
 # import functions from .py files
-from feature_engineer import *
-from node_embeddings import *
-from multilink_prediction import *
-from cp_sat import *
-from visualise import *
-from utils import set_seed
-set_seed(42)
+from algorithm.feature_engineer import *
+from algorithm.node_embeddings import *
+from algorithm.multilink_prediction import *
+from algorithm.cp_sat import *
+from algorithm.visualise import *
 
-def execute_algorithm(file_name):
-    #----------------------------LOAD DATA----------------------------#
-    survey_outcome = pd.read_excel(file_name, sheet_name="survey_data")
+def execute_algorithm(file_input_dict: dict[str, pd.DataFrame]):
+    # #----------------------------LOAD DATA----------------------------#
+    # survey_outcome = pd.read_excel(file_name, sheet_name="survey_data")
+    # survey_outcome.set_index("Participant-ID", inplace=True)
+
+    # survey_outcome_raw = pd.read_excel(file_name, sheet_name="survey_data")
+    # survey_outcome_raw = survey_outcome_raw.set_index('Participant-ID')
+
+    # net_friends = pd.read_excel(file_name, sheet_name="net_0_Friends")
+    # net_disrespect = pd.read_excel(file_name, sheet_name="net_5_Disrespect")
+    # net_influential = pd.read_excel(file_name, sheet_name="net_1_Influential")
+    # net_feedback = pd.read_excel(file_name, sheet_name="net_2_Feedback")
+    # net_advice = pd.read_excel(file_name, sheet_name="net_4_Advice")
+    # net_moretime = pd.read_excel(file_name, sheet_name="net_3_MoreTime")
+    # net_affiliation = pd.read_excel(file_name, sheet_name="net_affiliation")
+
+    survey_outcome = file_input_dict["survey_data"].copy()
     survey_outcome.set_index("Participant-ID", inplace=True)
 
-    survey_outcome_raw = pd.read_excel(file_name, sheet_name="survey_data")
+    survey_outcome_raw = file_input_dict["survey_data"].copy()
     survey_outcome_raw = survey_outcome_raw.set_index('Participant-ID')
 
-    net_friends = pd.read_excel(file_name, sheet_name="net_0_Friends")
-    net_disrespect = pd.read_excel(file_name, sheet_name="net_5_Disrespect")
-    net_influential = pd.read_excel(file_name, sheet_name="net_1_Influential")
-    net_feedback = pd.read_excel(file_name, sheet_name="net_2_Feedback")
-    net_advice = pd.read_excel(file_name, sheet_name="net_4_Advice")
-    net_moretime = pd.read_excel(file_name, sheet_name="net_3_MoreTime")
-    net_affiliation = pd.read_excel(file_name, sheet_name="net_affiliation")
+    net_friends = file_input_dict["net_0_friends"]
+    net_disrespect = file_input_dict["net_5_disrespect"]
+    net_influential = file_input_dict["net_1_influential"]
+    net_feedback = file_input_dict["net_2_feedback"]
+    net_advice = file_input_dict["net_4_advice"]
+    net_moretime = file_input_dict["net_3_moretime"]
+    net_affiliation = file_input_dict["net_affiliation"]
+
+
+
 
     random.seed(42)
     np.random.seed(42)
@@ -295,3 +310,5 @@ def execute_algorithm(file_name):
             "Y_pred_df": Y_pred_df,                    # Predicted survey outcomes + Assigned_Class
             "predicted_links": predicted_link_df,      # Social tie predictions 
         }
+    
+    return df_SNA, Y_pred_df, predicted_link_df

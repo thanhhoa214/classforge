@@ -1,0 +1,75 @@
+from fastapi import FastAPI
+from rq import Queue
+from redis import Redis
+import uuid
+import time
+from dataloading.dataloader import DataLoader
+from dataloading.api import DB
+from contextlib import asynccontextmanager
+from algofunction import run_algorithm
+
+db = DB()
+db.connect('dataloading/db.env')
+loaded_rela = ['net_0_friends', 'net_1_influential', 'net_2_feedback', 'net_3_moretime','net_4_advice', 'net_5_disrespect', 'net_affiliation']
+loaded_sheet = ["participants", "affiliations", "survey_data"]
+
+dl = DataLoader(db, folder = 'data',loaded_sheet = loaded_sheet
+                , loaded_relationship= loaded_rela)
+
+@asynccontextmanager
+async def lifespan(app: FastAPI):
+    # Load the data when the app starts
+    dl.load_test_data("test_data_load.xlsx")
+    dl.agent_sample_load()
+    yield
+
+app = FastAPI(lifespan=lifespan)
+
+redis_conn = Redis(host='localhost', port=6379)  # Connect to Redis service by container name
+queue = Queue(connection=redis_conn)
+
+@app.get("/")
+async def root():
+    return {"message": "Hello World"}
+
+@app.get("/run")
+async def run():
+    job_id = dl.get_last_process_run()
+    if job_id is None:
+        job_id = 0
+    else:
+        job_id += 1
+    job_id = str(job_id)
+    # Check if job_id already exists
+
+    if queue.fetch_job(job_id):
+        if queue.fetch_job(job_id).is_finished:
+            return {"status": "Algorithm already run"}
+    
+    queue.enqueue(run_algorithm, job_id=job_id)
+
+    return {"job_id": job_id}
+
+@app.get("/job-status/{job_id}")
+def job_status(job_id: str):
+    job = queue.fetch_job(job_id)
+    if job is None:
+        return {"status": "not_found"}
+    if job.is_finished:
+        return {"status": "completed", "result": job.result}
+    if job.is_failed:
+        return {"status": "failed"}
+    return {"status": "processing"}
+
+@app.post("/delete-data")
+async def delete_data():
+    db.execute_query("Match (n) DETACH DELETE n", {})
+    return {"status": "Data deleted"}
+
+
+    # 1. function for route getting latest process id
+
+    # 2. Route function for metrics of a process id
+
+
+    # 3. Each Route function for getting  statistic of all platforms (participant count, process count, relationship count, ...)
