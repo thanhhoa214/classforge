@@ -107,8 +107,9 @@ You are working with a directed social network graph `G` using NetworkX.
   - Assigned_Class
 
 • Each edge represents a directed social relationship (Source → Target) with:
-  - Relation types: 'friends', 'disrespect', 'influential', 'advice', 'moretime'
+  - Relation types: 'friends', 'disrespect', 'influential', 'advice', 'moretime', 'feedback'
   - moretime: "Source spend more time with target than others"
+  - feedback: "Source recieve feedback from target"
 
 • When the user asks for support advice or a summary of a student:
 - Focus on what matters for intervention or action (not raw statistics).

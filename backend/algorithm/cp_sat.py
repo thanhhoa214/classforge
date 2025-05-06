@@ -21,6 +21,9 @@ def build_enriched_links(predicted_links_dict):
 
     for u, v in predicted_links_dict.get("advice", []):
         enriched_links.append((u, v, "advice", 10))
+        
+    for u, v in predicted_links_dict.get("feedback", []):
+        enriched_links.append((u, v, "feedback", 10))
 
     for u, v in predicted_links_dict.get("moretime", []):
         enriched_links.append((u, v, "moretime", 1))

@@ -47,7 +47,8 @@ def execute_algorithm(file_name):
         "advice": 3,
         "disrespect": -3,
         "moretime": 3,
-        "influential": 1.5
+        "influential": 1.5,
+        "feedback" : 1.5
     }
 
     net_dict = {
@@ -55,7 +56,8 @@ def execute_algorithm(file_name):
         "advice": net_advice,
         "disrespect": net_disrespect,
         "moretime": net_moretime,
-        "influential": net_influential
+        "influential": net_influential,
+        "feedback":net_feedback
     }
 
     # === Step 1: Prepare Training Data ===
@@ -127,7 +129,8 @@ def execute_algorithm(file_name):
         "advice": list(zip(net_advice['Source'], net_advice['Target'])),
         "moretime": list(zip(net_moretime['Source'], net_moretime['Target'])),
         "influential": list(zip(net_influential['Source'], net_influential['Target'])),
-        "disrespect": list(zip(net_disrespect['Source'], net_disrespect['Target']))
+        "disrespect": list(zip(net_disrespect['Source'], net_disrespect['Target'])),
+        "feedback": list(zip(net_feedback['Source'], net_feedback['Target']))
     }
 
     # Now, build the dataset for training the model
@@ -185,6 +188,8 @@ def execute_algorithm(file_name):
         elif relation == "advice":
             weight = 20000000
         elif relation == "moretime":
+            weight = 1000
+        elif relation == "feedback":
             weight = 1000
         elif relation == "influential":
             weight = 2000

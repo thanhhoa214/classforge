@@ -134,6 +134,8 @@ def train_multilabel_link_classifier(X, Y, hidden_dim=128, epochs=400, lr=0.0000
                 weight_multiplier[idx] = 1
             elif relation == "influential":
                 weight_multiplier[idx] = 1
+            elif relation == "feedback":
+                weight_multiplier[idx] = 1
             elif relation == "disrespect":
                 weight_multiplier[idx] = -5
 
