@@ -289,6 +289,21 @@ def execute_algorithm(file_name):
     predicted_link_df = pd.DataFrame(flattened, columns=["Source", "Target", "Relation"])
     predicted_link_df.to_csv("predicted_links.csv", index=False) #------ Link prediction
 
+    # Bundle all components into a dictionary
+    model_bundle = {
+        "survey_predictor": survey_predictor,
+        "multilabel_link_model": multilabel_link_model,
+        "embeddings": embeddings,
+        "relation_to_label": relation_to_label,
+        "relationship_weights": relationship_weights,
+        "X_train_columns": list(X_train.columns),
+        "Y_train_columns": list(Y_train.columns),
+    }
+
+    # Save to file
+    joblib.dump(model_bundle, "agent_models_bundle.pkl")
+    print("agent_models_bundle.pkl saved.")
+
     def load_agent_data():
         return {
             "df": df_SNA,                              # SNA metrics + wellbeing scores
