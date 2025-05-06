@@ -16,7 +16,7 @@ from langchain_core.messages import SystemMessage
 # GraphQuerytool to create an agent and Openai to parse the input and inteperet
 
 # === Load API Key ===
-load_dotenv("key.env", override=True)
+load_dotenv("../../GitHub/classforge/backend/algorithm/key.env", override=True)
 api_key = os.getenv("OPENAI_API_KEY")
 llm = ChatOpenAI(api_key=api_key, model="gpt-4o", temperature=0)
 
