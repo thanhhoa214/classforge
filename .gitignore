@@ -9,3 +9,4 @@ __pycache__/
 /test.ipynb
 
 neo4j/*
+redis-data/

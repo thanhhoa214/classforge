@@ -10,29 +10,31 @@ from sklearn.multioutput import MultiOutputRegressor
 import random
 
 # import functions from .py files
-from feature_engineer import *
-from node_embeddings import *
-from multilink_prediction import *
-from cp_sat import *
-from visualise import *
-from utils import set_seed
-set_seed(42)
+from algorithm.feature_engineer import *
+from algorithm.node_embeddings import *
+from algorithm.multilink_prediction import *
+from algorithm.cp_sat import *
+from algorithm.visualise import *
 
-def execute_algorithm(file_name):
-    #----------------------------LOAD DATA----------------------------#
-    survey_outcome = pd.read_excel(file_name, sheet_name="survey_data")
+# Making change to the function
+# Adding saving and visualize options - by default these functions won't visualize or save data to csv
+
+def execute_algorithm(file_input_dict: dict[str, pd.DataFrame], visualize: bool = True, 
+                      save_csv: bool = True) -> tuple[pd.DataFrame, pd.DataFrame, pd.DataFrame]:
+    # #----------------------------LOAD DATA----------------------------#
+    survey_outcome = file_input_dict["survey_data"].copy()
     survey_outcome.set_index("Participant-ID", inplace=True)
 
-    survey_outcome_raw = pd.read_excel(file_name, sheet_name="survey_data")
+    survey_outcome_raw = file_input_dict["survey_data"].copy()
     survey_outcome_raw = survey_outcome_raw.set_index('Participant-ID')
 
-    net_friends = pd.read_excel(file_name, sheet_name="net_0_Friends")
-    net_disrespect = pd.read_excel(file_name, sheet_name="net_5_Disrespect")
-    net_influential = pd.read_excel(file_name, sheet_name="net_1_Influential")
-    net_feedback = pd.read_excel(file_name, sheet_name="net_2_Feedback")
-    net_advice = pd.read_excel(file_name, sheet_name="net_4_Advice")
-    net_moretime = pd.read_excel(file_name, sheet_name="net_3_MoreTime")
-    net_affiliation = pd.read_excel(file_name, sheet_name="net_affiliation")
+    net_friends = file_input_dict["net_0_friends"]
+    net_disrespect = file_input_dict["net_5_disrespect"]
+    net_influential = file_input_dict["net_1_influential"]
+    net_feedback = file_input_dict["net_2_feedback"]
+    net_advice = file_input_dict["net_4_advice"]
+    net_moretime = file_input_dict["net_3_moretime"]
+    net_affiliation = file_input_dict["net_affiliation"]
 
     random.seed(42)
     np.random.seed(42)
@@ -259,7 +261,9 @@ def execute_algorithm(file_name):
 
     #---------------------------- Visualise and prepare data for agent ----------------------------#
     # Visualize the network after CP-SAT optimization and link prediction
-    visualize_predicted_network_colored(predicted_links_named, alloc_df=alloc_df, title="Predicted Student Network Colored by Class (after CP-SAT)")
+
+    if visualize:
+        visualize_predicted_network_colored(predicted_links_named, alloc_df=alloc_df, title="Predicted Student Network Colored by Class (after CP-SAT)")
 
     df_final = X_post.copy()
     df_final = df_final.merge(predicted_wellbeing_df, left_index=True, right_index=True)
@@ -275,11 +279,9 @@ def execute_algorithm(file_name):
         'mental_score_x': 'mental_score',
         'social_score_x': 'social_score'
     }).drop(columns=['academic_score_y', 'mental_score_y', 'social_score_y'])
-    df_SNA.to_csv("df.csv", index_label="Participant_ID") #------ SNA score + Wellbeings
-
+    
     # Merge Assigned_Class into Y_pred_df
     Y_pred_df = Y_pred_df.merge(alloc_df[['Assigned_Class']], left_index=True, right_index=True)
-    Y_pred_df.to_csv("Y_pred_df.csv", index_label="Participant_ID") #------ # Predicted survey data + Assigned Class
 
     flattened = []
     for relation, pairs in predicted_links_named.items():
@@ -287,7 +289,11 @@ def execute_algorithm(file_name):
             flattened.append((u, v, relation))
 
     predicted_link_df = pd.DataFrame(flattened, columns=["Source", "Target", "Relation"])
-    predicted_link_df.to_csv("predicted_links.csv", index=False) #------ Link prediction
+    
+    if save_csv:
+        df_SNA.to_csv("df.csv", index_label="Participant_ID") #------ SNA score + Wellbeings
+        Y_pred_df.to_csv("Y_pred_df.csv", index_label="Participant_ID") #------ # Predicted survey data + Assigned Class
+        predicted_link_df.to_csv("predicted_links.csv", index=False) #------ Link prediction
 
     def load_agent_data():
         return {
@@ -295,3 +301,5 @@ def execute_algorithm(file_name):
             "Y_pred_df": Y_pred_df,                    # Predicted survey outcomes + Assigned_Class
             "predicted_links": predicted_link_df,      # Social tie predictions 
         }
+    
+    return df_SNA, Y_pred_df, predicted_link_df

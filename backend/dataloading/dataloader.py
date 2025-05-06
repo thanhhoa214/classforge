@@ -115,7 +115,7 @@ class DataLoader:
         cypher = """
         MATCH (r:ProcessRun)
         RETURN r
-        ORDER BY r.created_at DESC
+        ORDER BY r.id DESC
         LIMIT 1
         """
         records, summary, key = self.db.execute_query(cypher, {})
@@ -402,8 +402,9 @@ class DataLoader:
             RETURN pr.id AS process_run_id
             ORDER BY pr.created_at DESC
             LIMIT 1
-            """     
+            """    
         process_run_id, _, _ = self.db.execute_query(cypher_last_sp_id, {"last_sp": last_sp})
+
         if not process_run_id:
             logger.info(f"No process run found for survey period {last_sp}")
             return None
@@ -654,13 +655,13 @@ class DataLoader:
         # Get the next process run ID
         last_run_id = self.get_last_process_run() + 1
         self.create_process_run(last_run_id, run_type="agent_data")
-
+        
         # Process metrics
         if not self._process_metrics(df_dict["df"], last_run_id):
             return False
 
         # Process survey data
-        if not self._process_survey_data(df_dict["df"], last_run_id):
+        if not self._process_survey_data(df_dict["Y_pred_df"], last_run_id):
             return False
 
         # Process relationships
@@ -679,7 +680,7 @@ class DataLoader:
         return True
 
     def _process_metrics(self, df: pd.DataFrame, run_id: int) -> bool:
-
+        df = self.fill_nan_values(df)
         _, summary, _ = self.create_data_metric_df(df, run_id)
         if not summary or not summary.counters or not summary.counters.nodes_created:
             logger.info(f"Failed to create metrics for run ID {run_id}")
@@ -750,3 +751,10 @@ class DataLoader:
         self.create_new_rela_table(predicted_df, 2)
 
         logger.info("Agent data loaded successfully")
+    
+    # 1. function for route getting latest process id
+
+    # 2. Route function for metrics of a process id
+
+
+    # 3. Each Route function for getting  statistic of all platforms (participant count, process count, relationship count, ...)
