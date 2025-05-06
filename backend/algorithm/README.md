@@ -78,6 +78,7 @@ Output
 - `df`: Final enriched features with well-being scores
 - `Y_pred_df`: Survey predictions + new class allocation
 - `predicted_links`: Finalised social tie predictions
+-  model_bundl, including -> survey_predictor, multilabel_link_model, embeddings, relation_to_label, relationship_weights, X_train_columns, Y_train_columns.
 
 Author
 ------
