@@ -1,6 +1,7 @@
 from fastapi import FastAPI
 from rq import Queue
 from redis import Redis
+import os
 import uuid
 import time
 from dataloading.dataloader import DataLoader
@@ -16,6 +17,8 @@ loaded_sheet = ["participants", "affiliations", "survey_data"]
 dl = DataLoader(db, folder = 'data',loaded_sheet = loaded_sheet
                 , loaded_relationship= loaded_rela)
 
+REDIS = os.getenv("REDIS_HOST", "localhost")
+
 @asynccontextmanager
 async def lifespan(app: FastAPI):
     # Load the data when the app starts
@@ -25,7 +28,7 @@ async def lifespan(app: FastAPI):
 
 app = FastAPI(lifespan=lifespan)
 
-redis_conn = Redis(host='localhost', port=6379)  # Connect to Redis service by container name
+redis_conn = Redis(host=REDIS, port=6379)
 queue = Queue(connection=redis_conn)
 
 @app.get("/")
@@ -35,16 +38,16 @@ async def root():
 @app.get("/run")
 async def run():
     job_id = dl.get_last_process_run()
+    print("job_id", job_id)
     if job_id is None:
         job_id = 0
     else:
         job_id += 1
     job_id = str(job_id)
-    # Check if job_id already exists
-
-    if queue.fetch_job(job_id):
-        if queue.fetch_job(job_id).is_finished:
-            return {"status": "Algorithm already run"}
+    
+    # Check if the job is already in the queue or is runnign
+    if queue.fetch_job(job_id) and (queue.fetch_job(job_id).is_finished or queue.fetch_job(job_id).is_started):
+            return {"status": "Algorithm already run - job_id: " + job_id}
     
     queue.enqueue(run_algorithm, job_id=job_id)
 

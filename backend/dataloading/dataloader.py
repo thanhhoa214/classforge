@@ -115,7 +115,7 @@ class DataLoader:
         cypher = """
         MATCH (r:ProcessRun)
         RETURN r
-        ORDER BY r.created_at DESC
+        ORDER BY r.id DESC
         LIMIT 1
         """
         records, summary, key = self.db.execute_query(cypher, {})
@@ -404,6 +404,7 @@ class DataLoader:
             LIMIT 1
             """    
         process_run_id, _, _ = self.db.execute_query(cypher_last_sp_id, {"last_sp": last_sp})
+
         if not process_run_id:
             logger.info(f"No process run found for survey period {last_sp}")
             return None

@@ -5,11 +5,11 @@ import os
 
 
 listen = ['default']
-print(os.getenv("REDIS_HOST", "localhost"))
+HOST = os.getenv("REDIS_HOST", "localhost")
 redis_conn = Redis(
-    # host=os.getenv("REDIS_HOST", "localhost"),
-    host="redis",
+    host=HOST,
     port=6379
+    
 )
 
 if __name__ == "__main__":
