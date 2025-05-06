@@ -71,6 +71,12 @@ async def delete_data():
 
 
     # 1. function for route getting latest process id
+@app.get("/latest-process-id")
+async def get_latest_process_id():
+    process_id = dl.get_last_process_run()
+    if process_id is None:
+        return {"latest_process_id": "Not found"}
+    return {"latest_process_id": process_id}
 
     # 2. Route function for metrics of a process id
 
