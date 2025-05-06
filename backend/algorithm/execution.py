@@ -315,3 +315,5 @@ def execute_algorithm(file_name):
             "Y_pred_df": Y_pred_df,                    # Predicted survey outcomes + Assigned_Class
             "predicted_links": predicted_link_df,      # Social tie predictions 
         }
+        
+execute_algorithm("../../GitHub/classforge/backend/algorithm/test_data_1.xlsx")
