@@ -76,7 +76,7 @@ export default function PreviewPanel({ result }: { result: AllocationResult }) {
   );
 
   return (
-    <main className="flex *:w-1/2 gap-6 p-6">
+    <div className="flex *:w-1/2 gap-4 p-6">
       <Card>
         <CardContent>
           <h2 className="text-xl font-semibold mb-4">Class Overview</h2>
@@ -145,7 +145,7 @@ export default function PreviewPanel({ result }: { result: AllocationResult }) {
           </CardContent>
         </Card>
       )}
-    </main>
+    </div>
   );
 }
 
