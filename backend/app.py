@@ -91,3 +91,25 @@ async def get_participant_count():
         return {"participant_count": count}
     except Exception as e:
         return {"status": "error", "message": str(e)}
+
+# Process Count
+@app.get("/metrics/processes")
+async def get_process_count():
+    try:
+        cypher = "MATCH (pr:Process) RETURN count(pr) AS count"
+        df = db.query_to_dataframe(cypher)
+        count = int(df.iloc[0]["count"]) if not df.empty else 0
+        return {"process_count": count}
+    except Exception as e:
+        return {"status": "error", "message": str(e)}
+
+# Relationship count
+@app.get("/metrics/relationships")
+async def get_relationship_count():
+    try:
+        cypher = "MATCH ()-[r]->() RETURN count(r) AS count"
+        df = db.query_to_dataframe(cypher)
+        count = int(df.iloc[0]["count"]) if not df.empty else 0
+        return {"relationship_count": count}
+    except Exception as e:
+        return {"status": "error", "message": str(e)}
