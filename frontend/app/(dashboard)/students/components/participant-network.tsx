@@ -45,8 +45,8 @@ export default function ParticipantNetwork({
   });
 
   return (
-    <div className={cn("flex border rounded-xl", className)}>
-      <div className="w-full max-w-md aspect-square rounded-xl overflow-hidden bg-white">
+    <div className={cn("flex items-start border rounded-xl", className)}>
+      <div className="w-full shrink-0 max-w-md aspect-square rounded-xl overflow-hidden bg-white">
         {participantIds.length > 0 ? (
           <>
             {isLoading && (

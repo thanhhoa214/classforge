@@ -3,7 +3,7 @@
 import { useState } from "react";
 import { type AllocationResult } from "./types";
 import { AlgorithmForm } from "./components/algorithm-form";
-import { PreviewPanel } from "./components/preview-panel";
+import PreviewPanel from "./components/preview-panel";
 
 export default function AllocationsPage() {
   const [result, setResult] = useState<AllocationResult | null>(null);
@@ -17,14 +17,10 @@ export default function AllocationsPage() {
         </p>
       </div>
 
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
-        <div className="space-y-6">
-          <AlgorithmForm onResult={setResult} />
-        </div>
-        <div>
-          <PreviewPanel result={result} />
-        </div>
+      <div className="w-4/5 max-w-5xl p-8 mx-auto">
+        <AlgorithmForm onResult={setResult} />
       </div>
+      {result && <PreviewPanel result={result} />}
     </div>
   );
 }

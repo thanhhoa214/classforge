@@ -7,45 +7,16 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import { useQuery } from "@tanstack/react-query";
 import { useState } from "react";
 import { StudentFilters, StudentFiltersType } from "./student-filters";
 import { Loader2 } from "lucide-react";
 import ParticipantNetwork from "./participant-network";
-import { useProcessId } from "@/hooks/useProcessId";
-import { MetricNode, neo4jDriver, ParticipantNode } from "@/lib/neo4j";
 import { formatNumber } from "@/lib/utils";
+import { useStudentsApi } from "@/hooks/useStudents";
 
 export function StudentDataTable() {
-  const { processId } = useProcessId();
-
   const [filters, setFilters] = useState<StudentFiltersType>({});
-  const { isLoading, data } = useQuery({
-    queryKey: ["students", processId],
-    queryFn: async () => {
-      const result = await neo4jDriver.executeQuery(`
-        MATCH (pr:ProcessRun)-[]-(m:Metric)-[:has_metric {}]-(p:Participant)
-        WHERE pr.id = ${processId}
-        RETURN m, p
-    `);
-      const students = result.records.map((record) => {
-        const participant = (record.get("p") as ParticipantNode).properties;
-        const metric = (record.get("m") as MetricNode).properties;
-        return {
-          house: participant.house,
-          name: `${participant.first_name} ${participant.last_name}`,
-          participantId: participant.participant_id.low,
-          academicScore: metric.academic_score,
-          mentalScore: metric.mental_score,
-          socialScore: metric.social_score,
-        };
-      });
-
-      return students;
-    },
-    staleTime: Infinity,
-    enabled: !!processId,
-  });
+  const { isLoading, data } = useStudentsApi();
 
   const students = data?.filter((student) => {
     if (

@@ -1,84 +1,86 @@
-"use client";
+// pages/index.tsx
+import { Card, CardContent } from "@/components/ui/card";
+import {
+  ProcessedStudent,
+  useStudentsApiFromProcessId,
+} from "@/hooks/useStudents";
+import {
+  BarChart,
+  Bar,
+  Radar,
+  RadarChart,
+  PolarGrid,
+  PolarAngleAxis,
+  PolarRadiusAxis,
+  XAxis,
+  YAxis,
+  Tooltip,
+  Legend,
+  ResponsiveContainer,
+} from "recharts";
+import { AllocationResult } from "../types";
 
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Progress } from "@/components/ui/progress";
-import { type AllocationResult } from "../types";
+const RadarMetric = ({ student }: { student: ProcessedStudent }) => {
+  const data = [
+    { metric: "Academic", value: student.academicScore },
+    { metric: "Social", value: student.socialScore },
+    { metric: "Mental", value: student.mentalScore },
+  ];
+  return (
+    <RadarChart outerRadius={90} width={300} height={250} data={data}>
+      <PolarGrid />
+      <PolarAngleAxis dataKey="metric" />
+      <PolarRadiusAxis angle={30} domain={[0, 100]} />
+      <Radar
+        name="Scores"
+        dataKey="value"
+        stroke="#3b82f6"
+        fill="#3b82f6"
+        fillOpacity={0.6}
+      />
+    </RadarChart>
+  );
+};
 
-interface PreviewPanelProps {
-  result: AllocationResult | null;
-}
-
-export function PreviewPanel({ result }: PreviewPanelProps) {
-  if (!result) {
-    return (
-      <Card>
-        <CardHeader>
-          <CardTitle>Preview</CardTitle>
-        </CardHeader>
-        <CardContent>
-          <p className="text-muted-foreground">
-            Generate an allocation to see the preview.
-          </p>
-        </CardContent>
-      </Card>
-    );
-  }
+export default function PreviewPanel({ result }: { result: AllocationResult }) {
+  const { data: students } = useStudentsApiFromProcessId(result.processId);
 
   return (
-    <Card>
-      <CardHeader>
-        <CardTitle>Allocation Preview</CardTitle>
-      </CardHeader>
-      <CardContent className="space-y-6">
-        <div>
-          <h3 className="text-sm font-medium mb-2">Classrooms</h3>
-          <div className="space-y-2">
-            {result.classrooms.map((classroom) => (
-              <div
-                key={classroom.id}
-                className="p-3 border rounded-lg bg-muted/50"
-              >
-                <h4 className="font-medium">{classroom.name}</h4>
-                <p className="text-sm text-muted-foreground">
-                  {classroom.students.length} students
-                </p>
-              </div>
-            ))}
-          </div>
-        </div>
+    <main className="grid grid-cols-1 md:grid-cols-3 gap-6 p-6">
+      <Card>
+        <CardContent>
+          <h2 className="text-xl font-semibold mb-4">Class Overview</h2>
 
-        <div>
-          <h3 className="text-sm font-medium mb-2">Performance Metrics</h3>
-          <div className="space-y-4">
-            <div>
-              <div className="flex justify-between text-sm mb-1">
-                <span>Academic Balance</span>
-                <span>{Math.round(result.metrics.academicBalance * 100)}%</span>
-              </div>
-              <Progress value={result.metrics.academicBalance * 100} />
-            </div>
-            <div>
-              <div className="flex justify-between text-sm mb-1">
-                <span>Constraint Satisfaction</span>
-                <span>
-                  {Math.round(result.metrics.constraintSatisfaction * 100)}%
-                </span>
-              </div>
-              <Progress value={result.metrics.constraintSatisfaction * 100} />
-            </div>
-            <div>
-              <div className="flex justify-between text-sm mb-1">
-                <span>Overall Score</span>
-                <span>{Math.round(result.metrics.overallScore * 100)}%</span>
-              </div>
-              <Progress value={result.metrics.overallScore * 100} />
-            </div>
-            <div className="text-sm text-muted-foreground">
-              Social Balance: {result.metrics.socialBalance.toFixed(2)}s
-            </div>
-          </div>
-        </div>
-      </CardContent>
-    </Card>
+          <ResponsiveContainer width="100%" height={200}>
+            <BarChart data={[result.metrics]}>
+              <XAxis dataKey="name" hide />
+              <YAxis />
+              <Tooltip />
+              <Legend />
+              <Bar dataKey="overallScore" fill="#4f46e5" name="Overall Score" />
+              <Bar
+                dataKey="academicBalance"
+                fill="#10b981"
+                name="Academic Balance"
+              />
+              <Bar
+                dataKey="socialBalance"
+                fill="#f59e0b"
+                name="Social Balance"
+              />
+            </BarChart>
+          </ResponsiveContainer>
+        </CardContent>
+      </Card>
+
+      {students?.map((s, i) => (
+        <Card key={i}>
+          <CardContent>
+            <h3 className="text-lg font-medium mb-2">{s.name}</h3>
+            <RadarMetric student={s} />
+          </CardContent>
+        </Card>
+      ))}
+    </main>
   );
 }

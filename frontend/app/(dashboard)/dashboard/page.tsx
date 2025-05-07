@@ -1,6 +1,7 @@
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Network, Users, GraduationCap, BarChart3 } from "lucide-react";
 import Processes from "../allocations/components/processes";
+import NetworkOverview from "./NetworkOverview";
 
 const metrics = [
   {
@@ -61,7 +62,7 @@ export default function DashboardPage() {
         })}
       </div>
 
-      <div className="mt-8 grid gap-4 md:grid-cols-2">
+      <div className="mt-8 flex flex-col md:flex-row items-start gap-4 *:w-1/2">
         <Card>
           <CardHeader>
             <CardTitle>Recent Allocations</CardTitle>
@@ -76,9 +77,10 @@ export default function DashboardPage() {
             <CardTitle>Network Overview</CardTitle>
           </CardHeader>
           <CardContent>
-            <p className="text-sm text-muted-foreground">
-              Network visualization will be displayed here.
+            <p className="text-sm text-muted-foreground mb-2">
+              Toggle students to view their connections
             </p>
+            <NetworkOverview />
           </CardContent>
         </Card>
       </div>

@@ -12,6 +12,6 @@ export function useProcessId() {
     staleTime: Infinity,
   });
 
-  const processId = Number(rid || data);
+  const processId = Number(rid || data) || 0;
   return { processId, isLoading };
 }
