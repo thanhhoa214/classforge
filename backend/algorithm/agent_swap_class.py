@@ -1,11 +1,11 @@
 import pandas as pd
 import joblib
-from cp_sat import apply_thresholds_from_classes
-from feature_engineer import (build_updated_net_dict,
+from algorithm.cp_sat import apply_thresholds_from_classes
+from algorithm.feature_engineer import (build_updated_net_dict,
                               compute_sna_features_from_graphs,
                               compute_predicted_wellbeing_scores)
 
-from utils import set_seed
+from algorithm.utils import set_seed
 set_seed(42)
 
 # === Load Required Files ===

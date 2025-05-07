@@ -9,14 +9,15 @@ from langgraph.prebuilt import create_react_agent
 from langchain_core.messages import HumanMessage, BaseMessage
 from pydantic import BaseModel
 from typing import List
-from agent_swap_class import reallocate_student_to_class
+#from agent_swap_class import reallocate_student_to_class
 from langchain_core.messages import SystemMessage
+from algorithm.agent_swap_class import reallocate_student_to_class
 
 # NetworkX to build construct graph G + LangChain(with networkX) to execute a custom python code (to answer)
 # GraphQuerytool to create an agent and Openai to parse the input and inteperet
 
 # === Load API Key ===
-load_dotenv("../../GitHub/classforge/backend/algorithm/key.env", override=True)
+load_dotenv("/Users/basanktw/Documents/GitHub/classforge/backend/algorithm/key.env", override=True)
 api_key = os.getenv("OPENAI_API_KEY")
 llm = ChatOpenAI(api_key=api_key, model="gpt-4o", temperature=0)
 
@@ -155,11 +156,11 @@ def reload_data_and_graph():
     }, inplace=True)
 
     # Reload edges
-    edges = pd.read_csv("predicted_links.csv")
+    edges = pd.read_csv("/Users/basanktw/Documents/GitHub/classforge/backend/predicted_links.csv")
 
     # Reload edges
     G_new = nx.MultiDiGraph()
-    edges = pd.read_csv("predicted_links.csv")
+    edges = pd.read_csv("/Users/basanktw/Documents/GitHub/classforge/backend/predicted_links.csv")
     for _, row in edges.iterrows():
         u, v, rel = row["Source"], row["Target"], row["Relation"]
         G_new.add_edge(u, v, relation=rel)

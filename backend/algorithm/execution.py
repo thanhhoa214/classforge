@@ -328,10 +328,10 @@ def execute_algorithm(file_input_dict: dict[str, pd.DataFrame], visualize: bool 
 def load_test_data(file_name):
     output_dict = {}
     survey_outcome = pd.read_excel(file_name, sheet_name="survey_data")
-    survey_outcome.set_index("Participant-ID", inplace=True)
+    #survey_outcome.set_index("Participant-ID", inplace=True)
 
     survey_outcome_raw = pd.read_excel(file_name, sheet_name="survey_data")
-    survey_outcome_raw = survey_outcome_raw.set_index('Participant-ID')
+    #survey_outcome_raw = survey_outcome_raw.set_index('Participant-ID')
 
     net_friends = pd.read_excel(file_name, sheet_name="net_0_Friends")
     net_disrespect = pd.read_excel(file_name, sheet_name="net_5_Disrespect")
@@ -353,5 +353,5 @@ def load_test_data(file_name):
     return output_dict
 
 
-test_data_dict = load_test_data("backend/algorithm/test_data_1.xlsx")
+test_data_dict = load_test_data("/Users/basanktw/Documents/GitHub/classforge/backend/algorithm/test_data_1.xlsx")
 execute_algorithm(test_data_dict, visualize=True, save_csv=True)
