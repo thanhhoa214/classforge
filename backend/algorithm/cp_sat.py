@@ -3,7 +3,7 @@ import pandas as pd
 import numpy as np
 import torch
 from ortools.sat.python import cp_model
-from utils import set_seed
+from algorithm.utils import set_seed
 set_seed(42)
 
 # ==============================

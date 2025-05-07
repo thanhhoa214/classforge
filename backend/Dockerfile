@@ -11,6 +11,8 @@ RUN apt-get update && apt-get install -y \
 RUN pip install torch --index-url https://download.pytorch.org/whl/cpu
 RUN pip install torch-scatter torch-sparse torch-geometric ortools
 RUN pip install pandas numpy scikit-learn matplotlib networkx seaborn openpyxl
+RUN pip install python-utils
+
 COPY requirements.txt .
 
 # Install Python dependencies
@@ -23,4 +25,4 @@ COPY . .
 ENV PYTHONPATH=/app
 
 # Command to run the application
-CMD ["python", "main.py"] 
+CMD ["uvicorn", "app:app", "--host", "0.0.0.0", "--port", "8000", "--reload"] 

@@ -10,7 +10,7 @@ import matplotlib.pyplot as plt
 import pandas as pd
 import numpy as np
 import random
-from utils import set_seed
+from algorithm.utils import set_seed
 set_seed(42)
 
 

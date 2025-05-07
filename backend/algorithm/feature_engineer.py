@@ -4,7 +4,7 @@ import numpy as np
 import torch
 import networkx as nx
 from sklearn.preprocessing import MinMaxScaler, LabelEncoder
-from utils import set_seed
+from algorithm.utils import set_seed
 set_seed(42)
 
 

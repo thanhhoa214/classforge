@@ -1,7 +1,7 @@
 import networkx as nx
 import seaborn as sns
 import matplotlib.pyplot as plt
-from utils import set_seed
+from algorithm.utils import set_seed
 set_seed(42)
 
 def visualize_predicted_network_colored(predicted_links, alloc_df, title="Predicted Student Network Colored by Class"):
