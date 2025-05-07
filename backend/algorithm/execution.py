@@ -324,6 +324,34 @@ def execute_algorithm(file_input_dict: dict[str, pd.DataFrame], visualize: bool 
     
     return df_SNA, Y_pred_df, predicted_link_df
 
-execute_algorithm("../../GitHub/classforge/backend/algorithm/test_data_1.xlsx")
+
+def load_test_data(file_name):
+    output_dict = {}
+    survey_outcome = pd.read_excel(file_name, sheet_name="survey_data")
+    survey_outcome.set_index("Participant-ID", inplace=True)
+
+    survey_outcome_raw = pd.read_excel(file_name, sheet_name="survey_data")
+    survey_outcome_raw = survey_outcome_raw.set_index('Participant-ID')
+
+    net_friends = pd.read_excel(file_name, sheet_name="net_0_Friends")
+    net_disrespect = pd.read_excel(file_name, sheet_name="net_5_Disrespect")
+    net_influential = pd.read_excel(file_name, sheet_name="net_1_Influential")
+    net_feedback = pd.read_excel(file_name, sheet_name="net_2_Feedback")
+    net_advice = pd.read_excel(file_name, sheet_name="net_4_Advice")
+    net_moretime = pd.read_excel(file_name, sheet_name="net_3_MoreTime")
+    net_affiliation = pd.read_excel(file_name, sheet_name="net_affiliation")
+
+    output_dict["survey_data"] = survey_outcome
+    output_dict["net_0_friends"] = net_friends
+    output_dict["net_5_disrespect"] = net_disrespect
+    output_dict["net_1_influential"] = net_influential
+    output_dict["net_2_feedback"] = net_feedback
+    output_dict["net_4_advice"] = net_advice
+    output_dict["net_3_moretime"] = net_moretime
+    output_dict["net_affiliation"] = net_affiliation
     
-    
+    return output_dict
+
+
+test_data_dict = load_test_data("backend/algorithm/test_data_1.xlsx")
+execute_algorithm(test_data_dict, visualize=True, save_csv=True)
