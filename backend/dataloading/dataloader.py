@@ -736,7 +736,7 @@ class DataLoader:
     def agent_sample_load(self):
 
         last_pr = self.get_last_process_run()
-        
+
         if last_pr >= 2:
             logger.info("Agent data already loaded")
             return
@@ -761,10 +761,3 @@ class DataLoader:
         self.create_new_rela_table(predicted_df, 2)
 
         logger.info("Agent data loaded successfully")
-    
-    # 1. function for route getting latest process id
-
-    # 2. Route function for metrics of a process id
-
-
-    # 3. Each Route function for getting  statistic of all platforms (participant count, process count, relationship count, ...)

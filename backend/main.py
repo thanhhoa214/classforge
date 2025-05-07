@@ -2,6 +2,7 @@ from fastapi import FastAPI
 from contextlib import asynccontextmanager
 from services.loader import get_loader
 from services.db import get_db
+from fastapi.middleware.cors import CORSMiddleware
 
 # Import routers
 from routers import metric, run, ws
@@ -19,6 +20,13 @@ app.include_router(metric.router)
 app.include_router(run.router)
 app.include_router(ws.router)
 
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["http://localhost:3000"],
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
 
 @app.post("/delete-data")
 async def delete_data():
