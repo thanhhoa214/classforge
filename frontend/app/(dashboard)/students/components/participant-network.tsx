@@ -17,6 +17,7 @@ const NetworkVisualization = dynamic(
 export interface ParticipantNetworkProps {
   participantIds: number[];
   className?: string;
+  showDetails?: boolean;
 }
 
 const labels: Record<NetworkType, string> = {
@@ -30,6 +31,7 @@ const labels: Record<NetworkType, string> = {
 
 export default function ParticipantNetwork({
   participantIds,
+  showDetails = true,
   className,
 }: ParticipantNetworkProps) {
   const { processId } = useProcessId();
@@ -73,7 +75,7 @@ export default function ParticipantNetwork({
         )}
       </div>
 
-      {networkData && (
+      {showDetails && networkData && (
         <div className="p-6">
           <h2 className="text-lg font-semibold">Network Details</h2>
           <p className="text-sm text-muted-foreground mb-4">

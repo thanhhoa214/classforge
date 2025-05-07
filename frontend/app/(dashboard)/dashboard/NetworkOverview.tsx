@@ -58,7 +58,8 @@ export default function NetworkOverview() {
 
       <ParticipantNetwork
         participantIds={selectedId ? [selectedId] : []}
-        className="flex-col border-0 max-w-sm"
+        showDetails={false}
+        className="border-0 max-w-sm"
       />
     </>
   );

@@ -1,5 +1,14 @@
-// pages/index.tsx
-import { Card, CardContent } from "@/components/ui/card";
+"use client";
+import {
+  Table,
+  TableBody,
+  TableCaption,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "@/components/ui/table";
+import { Card, CardContent, CardHeader } from "@/components/ui/card";
 import {
   ProcessedStudent,
   useStudentsApiFromProcessId,
@@ -15,10 +24,20 @@ import {
   XAxis,
   YAxis,
   Tooltip,
-  Legend,
   ResponsiveContainer,
+  Legend,
 } from "recharts";
 import { AllocationResult } from "../types";
+import {
+  Select,
+  SelectTrigger,
+  SelectContent,
+  SelectItem,
+  SelectValue,
+} from "@/components/ui/select";
+import { useEffect, useMemo, useState } from "react";
+import { formatNumber } from "@/lib/utils";
+import { Button } from "@/components/ui/button";
 
 const RadarMetric = ({ student }: { student: ProcessedStudent }) => {
   const data = [
@@ -27,7 +46,7 @@ const RadarMetric = ({ student }: { student: ProcessedStudent }) => {
     { metric: "Mental", value: student.mentalScore },
   ];
   return (
-    <RadarChart outerRadius={90} width={300} height={250} data={data}>
+    <RadarChart outerRadius={100} width={300} height={240} data={data}>
       <PolarGrid />
       <PolarAngleAxis dataKey="metric" />
       <PolarRadiusAxis angle={30} domain={[0, 100]} />
@@ -44,43 +63,145 @@ const RadarMetric = ({ student }: { student: ProcessedStudent }) => {
 
 export default function PreviewPanel({ result }: { result: AllocationResult }) {
   const { data: students } = useStudentsApiFromProcessId(result.processId);
+  const [selectedStudentId, setSelectedStudentId] = useState<string>();
+
+  useEffect(() => {
+    if (students && students.length > 0 && !selectedStudentId) {
+      setSelectedStudentId(students[0].participantId + "");
+    }
+  }, [students, selectedStudentId]);
+
+  const selectedStudent = students?.find(
+    (s) => s.participantId + "" === selectedStudentId
+  );
 
   return (
-    <main className="grid grid-cols-1 md:grid-cols-3 gap-6 p-6">
+    <main className="flex *:w-1/2 gap-6 p-6">
       <Card>
         <CardContent>
           <h2 className="text-xl font-semibold mb-4">Class Overview</h2>
 
-          <ResponsiveContainer width="100%" height={200}>
+          <ResponsiveContainer width="100%" height={300}>
             <BarChart data={[result.metrics]}>
               <XAxis dataKey="name" hide />
               <YAxis />
               <Tooltip />
               <Legend />
-              <Bar dataKey="overallScore" fill="#4f46e5" name="Overall Score" />
+
+              <Bar
+                dataKey="overallScore"
+                fill="#4f46e5"
+                name="Overall Score"
+                barSize={30}
+              />
               <Bar
                 dataKey="academicBalance"
                 fill="#10b981"
                 name="Academic Balance"
+                barSize={30}
               />
               <Bar
                 dataKey="socialBalance"
                 fill="#f59e0b"
                 name="Social Balance"
+                barSize={30}
               />
             </BarChart>
           </ResponsiveContainer>
         </CardContent>
       </Card>
 
-      {students?.map((s, i) => (
-        <Card key={i}>
-          <CardContent>
-            <h3 className="text-lg font-medium mb-2">{s.name}</h3>
-            <RadarMetric student={s} />
+      {students && <StudentsTableCard students={students} />}
+
+      {selectedStudent && (
+        <Card>
+          <CardHeader>
+            {students && students.length > 0 && (
+              <div className="mb-4">
+                <h2 className="text-xl font-semibold mb-4">Student Overview</h2>
+                <Select
+                  value={selectedStudentId}
+                  onValueChange={setSelectedStudentId}
+                >
+                  <SelectTrigger className="w-full max-w-md">
+                    <SelectValue placeholder="Select a student" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {students.map((s) => (
+                      <SelectItem
+                        key={s.participantId}
+                        value={String(s.participantId)}
+                      >
+                        {s.name}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+            )}
+          </CardHeader>
+          <CardContent className="flex flex-col items-center">
+            <RadarMetric student={selectedStudent} />
           </CardContent>
         </Card>
-      ))}
+      )}
     </main>
+  );
+}
+
+function StudentsTableCard({ students }: { students: ProcessedStudent[] }) {
+  const [randomSeed, setRandomSeed] = useState<number>(1);
+
+  const random15Students = useMemo(() => {
+    return (
+      students &&
+      Array.from({ length: 10 }, () =>
+        Math.floor(Math.random() * (students.length || 1) * randomSeed)
+      ).map((index) => students[index])
+    );
+  }, [students, randomSeed]);
+
+  return (
+    <Card>
+      <CardContent>
+        <div className="overflow-x-auto">
+          <Table>
+            <TableCaption>
+              A shortlist of students.{" "}
+              <Button
+                variant={"link"}
+                onClick={() => setRandomSeed((prev) => prev + 0.000000000001)}
+              >
+                Randomize
+              </Button>{" "}
+            </TableCaption>
+            <TableHeader>
+              <TableRow>
+                <TableHead>Name</TableHead>
+                <TableHead className="text-right">Academic</TableHead>
+                <TableHead className="text-right">Social</TableHead>
+                <TableHead className="text-right">Mental</TableHead>
+              </TableRow>
+            </TableHeader>
+            <TableBody>
+              {random15Students?.slice(0, 10).map((student) => (
+                <TableRow key={student.participantId}>
+                  <TableCell>{student.name}</TableCell>
+                  <TableCell className="text-right text-muted-foreground">
+                    {formatNumber(student.academicScore)}
+                  </TableCell>
+                  <TableCell className="text-right text-muted-foreground">
+                    {formatNumber(student.socialScore)}
+                  </TableCell>
+                  <TableCell className="text-right text-muted-foreground">
+                    {formatNumber(student.mentalScore)}
+                  </TableCell>
+                </TableRow>
+              ))}
+            </TableBody>
+          </Table>
+        </div>
+      </CardContent>
+    </Card>
   );
 }
