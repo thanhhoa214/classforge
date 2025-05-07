@@ -81,4 +81,13 @@ async def get_latest_process_id():
     # 2. Route function for metrics of a process id
 
 
-    # 3. Each Route function for getting  statistic of all platforms (participant count, process count, relationship count, ...)
+# Participant count
+@app.get("/metrics/participants")
+async def get_participant_count():
+    try:
+        cypher = "MATCH (p:Participant) RETURN count(p) AS count"
+        df = db.query_to_dataframe(cypher)
+        count = int(df.iloc[0]["count"]) if not df.empty else 0
+        return {"participant_count": count}
+    except Exception as e:
+        return {"status": "error", "message": str(e)}
