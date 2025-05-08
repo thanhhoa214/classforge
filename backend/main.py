@@ -5,7 +5,7 @@ from services.db import get_db
 from fastapi.middleware.cors import CORSMiddleware
 
 # Import routers
-from routers import metric, run, ws
+from routers import metric, run, ws, chat
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
@@ -19,6 +19,7 @@ app = FastAPI(lifespan=lifespan)
 app.include_router(metric.router)
 app.include_router(run.router)
 app.include_router(ws.router)
+app.include_router(chat.router)
 
 # Add CORS middleware here
 

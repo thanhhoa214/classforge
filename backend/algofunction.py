@@ -24,8 +24,14 @@ def run_algorithm(save_data = True):
     }
 
     if save_data:
-        dl.create_agent_data(push_data_dict)
+        last_run_id = dl.create_agent_data(push_data_dict)
+        dl.update_last_process_run(process_run_id=last_run_id)
+        return last_run_id
+    
+    return None
+
 
 if __name__ == "__main__":
     pass
-    # run_algorithm()
+    # run_algorithm(save_data=False)
+    
