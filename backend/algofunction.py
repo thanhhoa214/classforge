@@ -4,19 +4,23 @@ from algorithm.exe_mental import execute_mental_algorithm
 from algorithm.exe_social import execute_social_algorithm
 from dataloading.api import DB
 from dataloading.dataloader import DataLoader
+from services.db import get_db
+from services.loader import get_loader
 
 
-def run_algorithm(save_data = True):
-    db = DB()
-    db.connect('dataloading/db.env')
-    loaded_rela = ['net_0_friends', 'net_1_influential', 'net_2_feedback', 'net_3_moretime','net_4_advice', 'net_5_disrespect', 'net_affiliation']
-    loaded_sheet = ["participants", "affiliations", "survey_data"]
-    dl = DataLoader(db, folder = 'data',loaded_sheet = loaded_sheet
-                    , loaded_relationship= loaded_rela)
+def run_algorithm(option = "balanced", save_data = True):
+    dl = get_loader()
 
     df_output_dict = dl.get_data_from_survey()
-    df_SNA, Y_pred_df, predicted_link_df = execute_algorithm(df_output_dict, False, False)
 
+    if option == "academic":
+        df_SNA, Y_pred_df, predicted_link_df = execute_academic_algorithm(df_output_dict, False, False)
+    elif option == "mental":
+        df_SNA, Y_pred_df, predicted_link_df = execute_mental_algorithm(df_output_dict, False, False)
+    elif option == "social":
+        df_SNA, Y_pred_df, predicted_link_df = execute_social_algorithm(df_output_dict, False, False)
+    else:
+        df_SNA, Y_pred_df, predicted_link_df = execute_algorithm(df_output_dict, False, False)
     df_SNA["Participant_ID"] = df_SNA.index
     Y_pred_df["Participant_ID"] = Y_pred_df.index
 
@@ -27,14 +31,8 @@ def run_algorithm(save_data = True):
     }
 
     if save_data:
-        last_run_id = dl.create_agent_data(push_data_dict)
-        dl.update_last_process_run(process_run_id=last_run_id)
-        return last_run_id
-    
-    return None
-
+        dl.create_agent_data(push_data_dict)
 
 if __name__ == "__main__":
     pass
-    # run_algorithm(save_data=False)
-    
+    # run_algorithm()
