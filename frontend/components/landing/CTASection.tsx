@@ -4,7 +4,7 @@ import { motion, useScroll, useTransform } from "motion/react";
 import { useInView } from "react-intersection-observer";
 import { Button } from "@/components/ui/button";
 import CTASVG from "./illustrations/CTASVG";
-import Link from "next/link";
+import { TransitionLink } from "../ui2/TransitionLink";
 
 export default function CTASection() {
   const [ref, inView] = useInView({
@@ -43,10 +43,10 @@ export default function CTASection() {
             </p>
             <div className="flex flex-wrap gap-4 justify-center lg:justify-start">
               <Button size="lg" asChild>
-                <Link href="/signup">Sign Up Free</Link>
+                <TransitionLink href="/signup">Sign Up Free</TransitionLink>
               </Button>
               <Button size="lg" variant="outline">
-                <Link href="/demo">Request Demo</Link>
+                <TransitionLink href="/demo">Request Demo</TransitionLink>
               </Button>
             </div>
           </motion.div>

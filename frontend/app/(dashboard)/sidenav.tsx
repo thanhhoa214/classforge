@@ -10,19 +10,18 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { cn } from "@/lib/utils";
 import {
   LayoutDashboard,
   Users,
   GraduationCap,
-  Settings,
   HelpCircle,
   ChevronRight,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useLocalStorage } from "usehooks-ts";
+import { TransitionLink } from "@/components/ui2/TransitionLink";
 
 const routes = [
   {
@@ -41,13 +40,8 @@ const routes = [
     icon: GraduationCap,
   },
   {
-    title: "Settings",
-    href: "/settings",
-    icon: Settings,
-  },
-  {
     title: "How it works",
-    href: "/help",
+    href: "/",
     icon: HelpCircle,
   },
 ];
@@ -116,7 +110,7 @@ export function Sidenav() {
         {routes.map((route) => {
           const Icon = route.icon;
           return (
-            <Link
+            <TransitionLink
               key={route.href}
               href={route.href}
               className={cn(
@@ -129,7 +123,7 @@ export function Sidenav() {
             >
               <Icon className={cn("size-4")} />
               {!isCollapsed && <span>{route.title}</span>}
-            </Link>
+            </TransitionLink>
           );
         })}
       </nav>

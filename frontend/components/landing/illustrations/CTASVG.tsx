@@ -3,7 +3,7 @@
 import { motion } from "motion/react";
 import { useInView } from "react-intersection-observer";
 
-export default function CTASVG() {
+export default function CTASVG({ color = "#ffffff" }: { color?: string }) {
   const [ref, inView] = useInView({
     triggerOnce: true,
     threshold: 0.1,
@@ -48,7 +48,7 @@ export default function CTASVG() {
         <path
           d="M 20 0 L 0 0 0 20"
           fill="none"
-          stroke="rgba(255, 255, 255, 0.1)"
+          stroke={`${color}10`}
           strokeWidth="0.5"
         />
       </pattern>
@@ -62,7 +62,7 @@ export default function CTASVG() {
           cy="150"
           r="60"
           fill="none"
-          stroke="rgba(255, 255, 255, 0.3)"
+          stroke={`${color}30`}
           strokeWidth="2"
           strokeDasharray="4 2"
           custom={0}
@@ -77,7 +77,7 @@ export default function CTASVG() {
           cy="130"
           r="50"
           fill="none"
-          stroke="rgba(255, 255, 255, 0.3)"
+          stroke={`${color}30`}
           strokeWidth="2"
           strokeDasharray="4 2"
           custom={1}
@@ -92,7 +92,7 @@ export default function CTASVG() {
           cy="200"
           r="40"
           fill="none"
-          stroke="rgba(255, 255, 255, 0.3)"
+          stroke={`${color}30`}
           strokeWidth="2"
           strokeDasharray="4 2"
           custom={2}
@@ -109,7 +109,7 @@ export default function CTASVG() {
           cx="80"
           cy="130"
           r="10"
-          fill="white"
+          fill={color}
           opacity="0.9"
           custom={0}
           variants={circleVariants}
@@ -120,7 +120,7 @@ export default function CTASVG() {
           cx="110"
           cy="160"
           r="8"
-          fill="white"
+          fill={color}
           opacity="0.9"
           custom={1}
           variants={circleVariants}
@@ -131,7 +131,7 @@ export default function CTASVG() {
           cx="70"
           cy="170"
           r="9"
-          fill="white"
+          fill={color}
           opacity="0.9"
           custom={2}
           variants={circleVariants}
@@ -142,7 +142,7 @@ export default function CTASVG() {
           cx="120"
           cy="130"
           r="7"
-          fill="white"
+          fill={color}
           opacity="0.9"
           custom={3}
           variants={circleVariants}
@@ -155,7 +155,7 @@ export default function CTASVG() {
           cx="210"
           cy="120"
           r="9"
-          fill="white"
+          fill={color}
           opacity="0.9"
           custom={4}
           variants={circleVariants}
@@ -166,7 +166,7 @@ export default function CTASVG() {
           cx="240"
           cy="150"
           r="8"
-          fill="white"
+          fill={color}
           opacity="0.9"
           custom={5}
           variants={circleVariants}
@@ -177,7 +177,7 @@ export default function CTASVG() {
           cx="260"
           cy="110"
           r="7"
-          fill="white"
+          fill={color}
           opacity="0.9"
           custom={6}
           variants={circleVariants}
@@ -190,7 +190,7 @@ export default function CTASVG() {
           cx="280"
           cy="190"
           r="8"
-          fill="white"
+          fill={color}
           opacity="0.9"
           custom={7}
           variants={circleVariants}
@@ -201,7 +201,7 @@ export default function CTASVG() {
           cx="320"
           cy="210"
           r="9"
-          fill="white"
+          fill={color}
           opacity="0.9"
           custom={8}
           variants={circleVariants}
@@ -218,7 +218,7 @@ export default function CTASVG() {
           y1="130"
           x2="110"
           y2="160"
-          stroke="white"
+          stroke={color}
           strokeWidth="1.5"
           opacity="0.6"
           custom={0}
@@ -231,7 +231,7 @@ export default function CTASVG() {
           y1="130"
           x2="70"
           y2="170"
-          stroke="white"
+          stroke={color}
           strokeWidth="1.5"
           opacity="0.6"
           custom={1}
@@ -244,7 +244,7 @@ export default function CTASVG() {
           y1="160"
           x2="70"
           y2="170"
-          stroke="white"
+          stroke={color}
           strokeWidth="1.5"
           opacity="0.6"
           custom={2}
@@ -257,7 +257,7 @@ export default function CTASVG() {
           y1="130"
           x2="80"
           y2="130"
-          stroke="white"
+          stroke={color}
           strokeWidth="1.5"
           opacity="0.6"
           custom={3}
@@ -270,7 +270,7 @@ export default function CTASVG() {
           y1="130"
           x2="110"
           y2="160"
-          stroke="white"
+          stroke={color}
           strokeWidth="1.5"
           opacity="0.6"
           custom={4}
@@ -285,7 +285,7 @@ export default function CTASVG() {
           y1="120"
           x2="240"
           y2="150"
-          stroke="white"
+          stroke={color}
           strokeWidth="1.5"
           opacity="0.6"
           custom={5}
@@ -298,7 +298,7 @@ export default function CTASVG() {
           y1="120"
           x2="260"
           y2="110"
-          stroke="white"
+          stroke={color}
           strokeWidth="1.5"
           opacity="0.6"
           custom={6}
@@ -311,7 +311,7 @@ export default function CTASVG() {
           y1="150"
           x2="260"
           y2="110"
-          stroke="white"
+          stroke={color}
           strokeWidth="1.5"
           opacity="0.6"
           custom={7}
@@ -326,7 +326,7 @@ export default function CTASVG() {
           y1="190"
           x2="320"
           y2="210"
-          stroke="white"
+          stroke={color}
           strokeWidth="1.5"
           opacity="0.6"
           custom={8}
@@ -341,7 +341,7 @@ export default function CTASVG() {
           y1="160"
           x2="210"
           y2="120"
-          stroke="white"
+          stroke={color}
           strokeWidth="1"
           opacity="0.3"
           strokeDasharray="4 2"
@@ -355,7 +355,7 @@ export default function CTASVG() {
           y1="150"
           x2="280"
           y2="190"
-          stroke="white"
+          stroke={color}
           strokeWidth="1"
           opacity="0.3"
           strokeDasharray="4 2"

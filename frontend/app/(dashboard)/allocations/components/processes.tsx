@@ -2,8 +2,8 @@
 import { neo4jDriver, ProcessNode } from "@/lib/neo4j";
 import { useQuery } from "@tanstack/react-query";
 import { ArrowUpRightFromSquareIcon } from "lucide-react";
-import Link from "next/link";
 import { startCase } from "lodash-es";
+import { TransitionLink } from "@/components/ui2/TransitionLink";
 
 export default function Processes() {
   const { data } = useQuery({
@@ -23,7 +23,7 @@ export default function Processes() {
     <ul className="flex flex-col gap-2">
       {data?.map((processRun) => (
         <li key={processRun.id.low}>
-          <Link
+          <TransitionLink
             href={`/students?rid=${processRun.id.low}`}
             className="rounded-md border p-4 flex flex-col bg-primary/5 hover:bg-primary/10 transition-colors relative"
           >
@@ -49,7 +49,7 @@ export default function Processes() {
                 {new Date(processRun.created_at).toLocaleString()}
               </span>
             </div>
-          </Link>
+          </TransitionLink>
         </li>
       )) ?? (
         <li className="text-sm text-muted-foreground">
