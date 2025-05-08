@@ -1,17 +1,29 @@
-from dataloading.api import *
-from dataloading.dataloader import DataLoader
+from fastapi import FastAPI
+from contextlib import asynccontextmanager
+from services.loader import get_loader
+from services.db import get_db
+from fastapi.middleware.cors import CORSMiddleware
 
-def main():
-    db = DB()
-    # db.execute_query("Match (n) DETACH DELETE n", {})
-    db.connect('dataloading/db.env')
-    loaded_rela = ['net_0_friends', 'net_1_influential', 'net_2_feedback', 'net_3_moretime','net_4_advice', 'net_5_disrespect', 'net_affiliation']
-    loaded_sheet = ["participants", "affiliations", "survey_data"]
+# Import routers
+from routers import metric, run, ws
 
-    dl = DataLoader(db, folder = 'data',loaded_sheet = loaded_sheet
-                    , loaded_relationship= loaded_rela)
-    df = dl.load_test_data("test_data_load.xlsx")
+@asynccontextmanager
+async def lifespan(app: FastAPI):
+    dl = get_loader()
+    # Load the data when the app starts
+    dl.load_test_data("test_data_load.xlsx")
     dl.agent_sample_load()
-    
-if __name__ == "__main__":
-    main()
+    yield
+
+app = FastAPI(lifespan=lifespan)
+app.include_router(metric.router)
+app.include_router(run.router)
+app.include_router(ws.router)
+
+# Add CORS middleware here
+
+@app.post("/delete-data")
+async def delete_data():
+    db = get_db()
+    db.execute_query("Match (n) DETACH DELETE n", {})
+    return {"status": "Data deleted"}

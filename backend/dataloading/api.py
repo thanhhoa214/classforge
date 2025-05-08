@@ -141,11 +141,3 @@ class DB:
         if not cypher:
             raise ValueError(f"No cypher for {node_type}.{query_type}")
         return self.query_to_dataframe(cypher, params)
-
-
-    # 1. function for route getting latest process id
-
-    # 2. Route function for metrics of a process id
-
-
-    # 3. Each Route function for getting  statistic of all platforms (participant count, process count, relationship count, ...)

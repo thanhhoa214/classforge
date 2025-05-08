@@ -121,6 +121,15 @@ class DataLoader:
         records, summary, key = self.db.execute_query(cypher, {})
         return records[0][key[0]]['id'] if records else None
     
+    def get_process_run(self, process_run_id):
+        cypher = """
+        MATCH (r:ProcessRun {id: $process_run_id})
+        RETURN r
+        LIMIT 1
+        """
+        records, summary, key = self.db.execute_query(cypher, {"process_run_id": process_run_id})
+        return records[0][key[0]]['id'] if records else None
+    
     def get_last_survey_period(self):
         cypher = """
         MATCH (s:SurveyPeriod)
@@ -727,7 +736,8 @@ class DataLoader:
     def agent_sample_load(self):
 
         last_pr = self.get_last_process_run()
-        if last_pr == 2:
+
+        if last_pr >= 2:
             logger.info("Agent data already loaded")
             return
 
@@ -751,10 +761,3 @@ class DataLoader:
         self.create_new_rela_table(predicted_df, 2)
 
         logger.info("Agent data loaded successfully")
-    
-    # 1. function for route getting latest process id
-
-    # 2. Route function for metrics of a process id
-
-
-    # 3. Each Route function for getting  statistic of all platforms (participant count, process count, relationship count, ...)

@@ -1,7 +1,7 @@
-python-utils
 fastapi==0.115.12
 neo4j==5.28.1
 python-dotenv==1.1.0
 redis==6.0.0
 rq==2.3.2
 uvicorn==0.23.2
+websockets
