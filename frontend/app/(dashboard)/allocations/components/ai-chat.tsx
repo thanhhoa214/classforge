@@ -135,9 +135,7 @@ export default function AiChat() {
             placeholder="Ask me anything about the allocation..."
             className="flex-1"
           />
-          <Button variant={"secondary"} type="submit">
-            Send
-          </Button>
+          <Button type="submit">Send</Button>
         </form>
         <p className="text-xs text-muted-foreground mt-1">
           <Info size={14} className="inline-block mb-px" /> Changes from AI bot
@@ -147,7 +145,9 @@ export default function AiChat() {
         <h3 className="font-semibold text-sm text-center mt-6">
           When you are done, please apply changes by clicking
         </h3>
-        <Button className="w-full mt-2">Apply changes</Button>
+        <Button variant={"secondary"} className="w-full mt-2">
+          Apply changes
+        </Button>
       </CardContent>
     </Card>
   );

@@ -1,7 +1,7 @@
 import { Suspense } from "react";
-import { PresetComparison } from "./components/preset-comparison";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
+import { PreviewPanel } from "./components/preview-panel";
 
 export default function ComparePage() {
   return (
@@ -22,7 +22,7 @@ export default function ComparePage() {
           </Card>
         }
       >
-        <PresetComparison />
+        <PreviewPanel />
       </Suspense>
     </div>
   );

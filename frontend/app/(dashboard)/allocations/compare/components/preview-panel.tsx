@@ -1,9 +1,8 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Progress } from "@/components/ui/progress";
-import { type AllocationResult } from "../../types";
 import {
   BarChart,
   Bar,
@@ -14,110 +13,124 @@ import {
   ResponsiveContainer,
 } from "recharts";
 
-interface PreviewPanelProps {
-  result: AllocationResult | null;
+interface MockResult {
+  classrooms: Array<{
+    id: string;
+    name: string;
+    students: Array<{
+      id: string;
+      name: string;
+      metrics: {
+        socialConnections: number;
+        academicPerformance: number;
+        behavioralMetrics: number;
+        learningStyle: number;
+        specialNeeds: number;
+      };
+    }>;
+  }>;
+  metrics: {
+    socialBalance: number;
+    academicBalance: number;
+    constraintSatisfaction: number;
+    overallScore: number;
+  };
 }
 
-export function PreviewPanel({ result }: PreviewPanelProps) {
-  const [displayRESULT, setDisplayRESULT] = useState<any | null>(null);
+const mockResult: MockResult = {
+  classrooms: [
+    {
+      id: "class-1",
+      name: "Class A",
+      students: [
+        {
+          id: "student-1",
+          name: "Alice",
+          metrics: {
+            socialConnections: 0.9,
+            academicPerformance: 0.8,
+            behavioralMetrics: 0.85,
+            learningStyle: 0.8,
+            specialNeeds: 0.7,
+          },
+        },
+        {
+          id: "student-2",
+          name: "Bob",
+          metrics: {
+            socialConnections: 0.85,
+            academicPerformance: 0.75,
+            behavioralMetrics: 0.8,
+            learningStyle: 0.75,
+            specialNeeds: 0.65,
+          },
+        },
+        {
+          id: "student-3",
+          name: "Charlie",
+          metrics: {
+            socialConnections: 0.8,
+            academicPerformance: 0.7,
+            behavioralMetrics: 0.75,
+            learningStyle: 0.7,
+            specialNeeds: 0.6,
+          },
+        },
+      ],
+    },
+    {
+      id: "class-2",
+      name: "Class B",
+      students: [
+        {
+          id: "student-4",
+          name: "David",
+          metrics: {
+            socialConnections: 0.8,
+            academicPerformance: 0.7,
+            behavioralMetrics: 0.75,
+            learningStyle: 0.7,
+            specialNeeds: 0.6,
+          },
+        },
+        {
+          id: "student-5",
+          name: "Eve",
+          metrics: {
+            socialConnections: 0.75,
+            academicPerformance: 0.65,
+            behavioralMetrics: 0.7,
+            learningStyle: 0.65,
+            specialNeeds: 0.55,
+          },
+        },
+        {
+          id: "student-6",
+          name: "Frank",
+          metrics: {
+            socialConnections: 0.7,
+            academicPerformance: 0.6,
+            behavioralMetrics: 0.65,
+            learningStyle: 0.6,
+            specialNeeds: 0.5,
+          },
+        },
+      ],
+    },
+  ],
+  metrics: {
+    socialBalance: 0.85,
+    academicBalance: 0.78,
+    constraintSatisfaction: 0.95,
+    overallScore: 0.88,
+  },
+};
+
+export function PreviewPanel() {
+  const displayRESULT = mockResult;
   const [activeTab, setActiveTab] = useState<"analytics" | "info">("analytics");
   const [currentPage, setCurrentPage] = useState(0);
-  const [viewMode, setViewMode] = useState<"start" | "end">("start");
-
-  useEffect(() => {
-    if (!result) {
-      setDisplayRESULT({
-        classrooms: [
-          {
-            id: "class-1",
-            name: "Class A",
-            students: [
-              {
-                id: "student-1",
-                name: "Alice",
-                metrics: {
-                  socialConnections: 0.9,
-                  academicPerformance: 0.8,
-                  behavioralMetrics: 0.85,
-                  learningStyle: 0.8,
-                  specialNeeds: 0.7,
-                },
-              },
-              {
-                id: "student-2",
-                name: "Bob",
-                metrics: {
-                  socialConnections: 0.85,
-                  academicPerformance: 0.75,
-                  behavioralMetrics: 0.8,
-                  learningStyle: 0.75,
-                  specialNeeds: 0.65,
-                },
-              },
-              {
-                id: "student-3",
-                name: "Charlie",
-                metrics: {
-                  socialConnections: 0.8,
-                  academicPerformance: 0.7,
-                  behavioralMetrics: 0.75,
-                  learningStyle: 0.7,
-                  specialNeeds: 0.6,
-                },
-              },
-            ],
-          },
-          {
-            id: "class-2",
-            name: "Class B",
-            students: [
-              {
-                id: "student-4",
-                name: "David",
-                metrics: {
-                  socialConnections: 0.8,
-                  academicPerformance: 0.7,
-                  behavioralMetrics: 0.75,
-                  learningStyle: 0.7,
-                  specialNeeds: 0.6,
-                },
-              },
-              {
-                id: "student-5",
-                name: "Eve",
-                metrics: {
-                  socialConnections: 0.75,
-                  academicPerformance: 0.65,
-                  behavioralMetrics: 0.7,
-                  learningStyle: 0.65,
-                  specialNeeds: 0.55,
-                },
-              },
-              {
-                id: "student-6",
-                name: "Frank",
-                metrics: {
-                  socialConnections: 0.7,
-                  academicPerformance: 0.6,
-                  behavioralMetrics: 0.65,
-                  learningStyle: 0.6,
-                  specialNeeds: 0.5,
-                },
-              },
-            ],
-          },
-        ],
-        metrics: {
-          socialBalance: 0.85,
-          academicBalance: 0.78,
-          constraintSatisfaction: 0.95,
-          overallScore: 0.88,
-        },
-      });
-    } else {
-      setDisplayRESULT(result);
-    }
-  }, [result]);
+  const [viewMode] = useState<"start" | "end">("start");
 
   if (!displayRESULT) {
     return (
@@ -135,7 +148,7 @@ export function PreviewPanel({ result }: PreviewPanelProps) {
   }
 
   const students = displayRESULT.classrooms.flatMap(
-    (classroom: any) => classroom.students
+    (classroom) => classroom.students
   );
   const studentsToShow =
     viewMode === "start"
@@ -175,7 +188,7 @@ export function PreviewPanel({ result }: PreviewPanelProps) {
           <div>
             <h3 className="text-sm font-medium mb-2">Classrooms</h3>
             <div className="space-y-2">
-              {displayRESULT.classrooms.map((classroom: any) => (
+              {displayRESULT.classrooms.map((classroom) => (
                 <div
                   key={classroom.id}
                   className="p-3 border rounded-lg bg-muted/50"
