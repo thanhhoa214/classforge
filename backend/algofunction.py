@@ -27,4 +27,5 @@ def run_algorithm(save_data = True):
         dl.create_agent_data(push_data_dict)
 
 if __name__ == "__main__":
-    run_algorithm()
+    pass
+    # run_algorithm()
