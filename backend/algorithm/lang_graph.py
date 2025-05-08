@@ -176,13 +176,15 @@ def reload_data_and_graph():
  
 # Re-allocate students and evaluate
 def handle_reallocate_student() -> None:
+    global trigger_changed
     try:
         student_id = int(input("Enter the student ID: ").strip())
         new_class = int(input("Enter the new class to assign: ").strip())
 
         # Load original wellbeing scores
-        df_before = pd.read_csv("df.csv", index_col="Participant_ID")
-        scores_before = df_before.loc[[student_id], ["academic_score", "mental_score", "social_score"]]
+        metrics = ["Academic_Wellbeing_Score", "Mental_Wellbeing_Score", "Social_Wellbeing_Score", "Academic_Grade_Percent", "Effort_Percent", "Attendance_Percent"]
+        scores_before = df_nodes.loc[[student_id], metrics]
+        old_class = df_nodes.loc[student_id, "Assigned_Class"]
 
         # Run reallocation and get updated results
         result = reallocate_student_to_class(student_id, new_class)
@@ -193,10 +195,31 @@ def handle_reallocate_student() -> None:
         scores_after = result['individual_scores']
 
         updated_class = result["Y_pred_df"].loc[student_id, "Assigned_Class"]
-        print(f"\nStudent {student_id} is now in Class {updated_class}")
-        print("\nWellbeing score changes:")
-        print("Before:\n", scores_before.loc[student_id])
-        print("After:\n", scores_after.loc[student_id])
+        print(f"\nStudent {student_id} moved from Class {old_class} to Class {updated_class}")
+        print("Before:") # before per individual
+        print(scores_before.loc[student_id].rename({
+            "Academic_Grade_Percent": "Academic Grade %",
+            "Effort_Percent": "Effort %",
+            "Attendance_Percent": "Attendance %",
+            "Academic_Wellbeing_Score": "Academic-wellbeing",
+            "Mental_Wellbeing_Score": "Menta-wellbeing",
+            "Social_Wellbeing_Score": "Social-wellbeing"
+        }))
+        print("After:") # after per individual
+        after_combined = pd.concat([
+            scores_after.loc[[student_id]].rename(columns={
+                "academic_score": "Academic-wellbeing",
+                "mental_score": "Mental-wellbeing",
+                "social_score": "Social-wellbeing"
+            }),
+            new_classes.loc[[student_id], ["Perc_Academic", "Perc_Effort", "Attendance"]].rename(columns={
+                "Perc_Academic": "Academic Grade %",
+                "Perc_Effort": "Effort %",
+                "Attendance": "Attendance %"
+            })
+        ], axis=1)
+
+        print(after_combined.loc[student_id])
         print("-" * 30)
 
         # Ask to save
@@ -207,14 +230,19 @@ def handle_reallocate_student() -> None:
             new_links.to_csv("predicted_links.csv", index=False)
             print("Reallocation saved. Reloading graph...")
             reload_data_and_graph()
+            trigger_changed = True
+            print(trigger_changed)
         else:
             print("Changes discarded. No files updated.")
+            trigger_changed = False
+            print(trigger_changed)
 
     except Exception as e:
         print(f"Error while reallocating student: {e}")
 
 # === Run Interactive Session ===
 if __name__ == "__main__":
+    trigger_changed = False
     print("LangGraph Agent Ready. Ask your graph question (type 'exit' to quit).\n")
     while True:
         query = input("Ask your LangGraph Agent: ").strip()
