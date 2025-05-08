@@ -4,6 +4,7 @@ RETURN
     pr.name AS name,
     pr.run_type AS run_type,
     pr.description AS description,
+    pr.status AS status,
     pr.start_date AS start_date,
     pr.end_date AS end_date,
     pr.created_at AS created_at,

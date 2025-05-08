@@ -111,13 +111,22 @@ class DataLoader:
 
         return insertedID
 
-    def get_last_process_run(self):
+    def get_last_process_run(self, success = False):
         cypher = """
         MATCH (r:ProcessRun)
         RETURN r
         ORDER BY r.id DESC
         LIMIT 1
         """
+
+        if success:
+            cypher = """
+            MATCH (r:ProcessRun {status: "completed"})
+            RETURN r
+            ORDER BY r.id DESC
+            LIMIT 1
+            """
+
         records, summary, key = self.db.execute_query(cypher, {})
         return records[0][key[0]]['id'] if records else None
     
@@ -150,12 +159,16 @@ class DataLoader:
         record, summary, key = self.db.execute_query(cypher, {"filename": filename})
         return True if record else False
 
-    def create_process_run(self, next_run_id, run_type = "initial_loading"):
+    def create_process_run(self, next_run_id
+                           , run_type = "initial_loading"
+                           , name = "Excel to CSV Data Loader"
+                           , description = "Loading data from Excel sheets into the database"):
         process_params = {
             "id": next_run_id,
-            "name": f"Excel to CSV Data Loader",
+            "name": name,
             "run_type": run_type,
-            "description": "Loading data from Excel sheets into the database",
+            "description": description,
+            "status": "running",
             "start_date": datetime.now().isoformat(),
             "end_date": None,
             "created_at": datetime.now().isoformat(),
@@ -345,7 +358,7 @@ class DataLoader:
         
         self.create_patcipant_relationship(next_survey_period_id, participant_df)
         
-
+        self.update_last_process_run()
         # check and create metrics
 
         logger.info(f"Loaded {len(participant_df)} metrics from {file_path}")
@@ -566,7 +579,7 @@ class DataLoader:
         cypher = """
         MATCH (p:Participant)<-[:has_metric]-(m:Metric)<-[:computed_metric]-(pr:ProcessRun {id: $runid})
         RETURN
-            p.participant_id AS `participant_id`,
+            p.participant_id AS `Participant_ID`,
             m.friends_in_degree  AS `friends_in_degree`,
             m.friends_out_degree  AS `friends_out_degree`,
             m.friends_closeness  AS `friends_closeness`,
@@ -646,9 +659,9 @@ class DataLoader:
             ELSE "unknown"
         END AS relation
         ORDER BY relation
-        RETURN p1.participant_id AS source, 
-                p2.participant_id AS target,
-                relation
+        RETURN p1.participant_id AS Source, 
+                p2.participant_id AS Target,
+                relation AS Relation
        """
 
        return self.db.query_to_dataframe(cypher, {"runid": runid})
@@ -659,26 +672,26 @@ class DataLoader:
         """
         # Validate required keys
         if not self._validate_required_keys(df_dict, ["df", "predicted_links", "Y_pred_df"]):
-            return False
+            return None
 
         # Get the next process run ID
         last_run_id = self.get_last_process_run() + 1
-        self.create_process_run(last_run_id, run_type="agent_data")
+        self.create_process_run(last_run_id, run_type="agent_data", name = "Agent Data Loader " + str(last_run_id), description = "Agent data loading ")
         
         # Process metrics
         if not self._process_metrics(df_dict["df"], last_run_id):
-            return False
+            return None
 
         # Process survey data
         if not self._process_survey_data(df_dict["Y_pred_df"], last_run_id):
-            return False
+            return None
 
         # Process relationships
         if not self._process_relationships(df_dict["predicted_links"], last_run_id):
-            return False
+            return None
 
         logger.info(f"Agent data creation completed successfully for run ID {last_run_id}")
-        return True
+        return last_run_id
 
     def _validate_required_keys(self, df_dict: dict[str, pd.DataFrame], required_keys: list[str]) -> bool:
 
@@ -716,20 +729,20 @@ class DataLoader:
         return True
     
 
-    def get_agent_data(self) -> dict[str, pd.DataFrame]:
+    def get_agent_data(self, load_completed_data_only = False) -> dict[str, pd.DataFrame]:
         """
         Get agent data from the database.
         """
         agent_data = {}
-        last_run_id = self.get_last_process_run()
+        last_run_id = self.get_last_process_run(success=load_completed_data_only)
 
         if not last_run_id:
             logger.info("No process run found")
             return agent_data
 
-        agent_data["metrics"] = self.load_agent_metric_df(last_run_id)
-        agent_data["survey_data"] = self.load_agent_survey_df(last_run_id)
-        agent_data["relationships"] = self.load_agent_relationship_df(last_run_id)
+        agent_data["df"] = self.load_agent_metric_df(last_run_id)
+        agent_data["Y_pred_df"] = self.load_agent_survey_df(last_run_id)
+        agent_data["predicted_links"] = self.load_agent_relationship_df(last_run_id)
 
         return agent_data
     
@@ -749,7 +762,7 @@ class DataLoader:
         test_df.columns = map(str.lower, test_df.columns)
         test_df = self.fill_nan_values(test_df)
         test_df['run_id'] = 2
-        self.create_process_run(2)
+        self.create_process_run(2, run_type="sample_agent_data", name = "Agent Data Loader Sample Run", description = "Agent data loading ")
         self.create_data_metric_df(test_df, 2)
 
         y_pred_df.columns = map(str.lower, y_pred_df.columns)
@@ -760,4 +773,20 @@ class DataLoader:
         predicted_df.columns = map(str.lower, predicted_df.columns)
         self.create_new_rela_table(predicted_df, 2)
 
+        self.update_last_process_run(process_run_id=2)
         logger.info("Agent data loaded successfully")
+
+    def update_last_process_run(self, status = "completed", process_run_id = None):
+        if not process_run_id:
+            process_run_id = self.get_last_process_run()
+            if not process_run_id:
+                logger.info("No process run found")
+                return None
+            
+        cypher = """
+        MATCH (r:ProcessRun {id: $process_run_id})
+        SET r.status = $status
+        RETURN r.id
+        """
+        records, summary, keys = self.db.execute_query(cypher, {"process_run_id": process_run_id, "status": status})
+        return records[0][keys[0]] if records else None

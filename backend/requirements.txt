@@ -5,3 +5,6 @@ redis==6.0.0
 rq==2.3.2
 uvicorn==0.23.2
 websockets
+langchain
+langchain_openai
+langgraph
