@@ -353,5 +353,5 @@ def load_test_data(file_name):
     return output_dict
 
 
-test_data_dict = load_test_data("backend/algorithm/test_data_1.xlsx")
+test_data_dict = load_test_data("algorithm/test_data_1.xlsx")
 execute_algorithm(test_data_dict, visualize=True, save_csv=True)
