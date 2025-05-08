@@ -61,7 +61,7 @@ def reallocate_endpoint(
     The class_id is the ID of the new class to which the student will be reallocated.
 
     -> Will return the process_id of the reallocation => use that process_id to get changes data
-
+    Use -user_id: 32392 and class_id: 2 for testing
     
     """
     # Extract the target_id and class_id from the request
