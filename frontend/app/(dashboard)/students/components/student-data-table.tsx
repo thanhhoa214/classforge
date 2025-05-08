@@ -19,11 +19,12 @@ import {
 import { useState, useMemo } from "react";
 import { StudentFilters, StudentFiltersType } from "./student-filters";
 import { Loader2 } from "lucide-react";
-import { formatNumber } from "@/lib/utils";
+import { cn, formatNumber } from "@/lib/utils";
 import { useStudentsApiFromProcessId } from "@/hooks/useStudents";
 
 export function StudentDataTable({
   processId,
+  className,
   onSelectedIdChange,
 }: {
   processId?: number;
@@ -114,7 +115,7 @@ export function StudentDataTable({
   };
 
   return (
-    <div className="space-y-4 grow">
+    <div className={cn("space-y-4 grow", className)}>
       <StudentFilters filters={filters} onFiltersChange={setFilters} />
 
       <Table>

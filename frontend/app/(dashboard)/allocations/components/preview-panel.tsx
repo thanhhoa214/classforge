@@ -94,7 +94,7 @@ export default function PreviewPanel({ result }: { result: AllocationResult }) {
           {students && (
             <StudentDataTable
               processId={result.processId}
-              className="flex-col"
+              className="flex-col mt-4"
               onSelectedIdChange={(id) =>
                 setSelectedStudentId(id ? id + "" : undefined)
               }
