@@ -1,4 +1,7 @@
 from algorithm.execution import execute_algorithm
+from algorithm.exe_academic import execute_academic_algorithm
+from algorithm.exe_mental import execute_mental_algorithm
+from algorithm.exe_social import execute_social_algorithm
 from dataloading.api import DB
 from dataloading.dataloader import DataLoader
 
