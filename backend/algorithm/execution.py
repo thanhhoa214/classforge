@@ -49,7 +49,8 @@ def execute_algorithm(file_input_dict: dict[str, pd.DataFrame], visualize: bool 
         "advice": 3,
         "disrespect": -3,
         "moretime": 3,
-        "influential": 1.5
+        "influential": 1.5,
+        "feedback" : 1.5
     }
 
     net_dict = {
@@ -57,7 +58,8 @@ def execute_algorithm(file_input_dict: dict[str, pd.DataFrame], visualize: bool 
         "advice": net_advice,
         "disrespect": net_disrespect,
         "moretime": net_moretime,
-        "influential": net_influential
+        "influential": net_influential,
+        "feedback":net_feedback
     }
 
     # === Step 1: Prepare Training Data ===
@@ -129,7 +131,8 @@ def execute_algorithm(file_input_dict: dict[str, pd.DataFrame], visualize: bool 
         "advice": list(zip(net_advice['Source'], net_advice['Target'])),
         "moretime": list(zip(net_moretime['Source'], net_moretime['Target'])),
         "influential": list(zip(net_influential['Source'], net_influential['Target'])),
-        "disrespect": list(zip(net_disrespect['Source'], net_disrespect['Target']))
+        "disrespect": list(zip(net_disrespect['Source'], net_disrespect['Target'])),
+        "feedback": list(zip(net_feedback['Source'], net_feedback['Target']))
     }
 
     # Now, build the dataset for training the model
@@ -187,6 +190,8 @@ def execute_algorithm(file_input_dict: dict[str, pd.DataFrame], visualize: bool 
         elif relation == "advice":
             weight = 20000000
         elif relation == "moretime":
+            weight = 1000
+        elif relation == "feedback":
             weight = 1000
         elif relation == "influential":
             weight = 2000
@@ -295,6 +300,21 @@ def execute_algorithm(file_input_dict: dict[str, pd.DataFrame], visualize: bool 
         Y_pred_df.to_csv("Y_pred_df.csv", index_label="Participant_ID") #------ # Predicted survey data + Assigned Class
         predicted_link_df.to_csv("predicted_links.csv", index=False) #------ Link prediction
 
+    # Bundle all components into a dictionary
+    model_bundle = {
+        "survey_predictor": survey_predictor,
+        "multilabel_link_model": multilabel_link_model,
+        "embeddings": embeddings,
+        "relation_to_label": relation_to_label,
+        "relationship_weights": relationship_weights,
+        "X_train_columns": list(X_train.columns),
+        "Y_train_columns": list(Y_train.columns),
+    }
+
+    # Save to file
+    joblib.dump(model_bundle, "agent_models_bundle.pkl")
+    print("agent_models_bundle.pkl saved.")
+
     def load_agent_data():
         return {
             "df": df_SNA,                              # SNA metrics + wellbeing scores
@@ -303,3 +323,35 @@ def execute_algorithm(file_input_dict: dict[str, pd.DataFrame], visualize: bool 
         }
     
     return df_SNA, Y_pred_df, predicted_link_df
+
+
+def load_test_data(file_name):
+    output_dict = {}
+    survey_outcome = pd.read_excel(file_name, sheet_name="survey_data")
+    #survey_outcome.set_index("Participant-ID", inplace=True)
+
+    survey_outcome_raw = pd.read_excel(file_name, sheet_name="survey_data")
+    #survey_outcome_raw = survey_outcome_raw.set_index('Participant-ID')
+
+    net_friends = pd.read_excel(file_name, sheet_name="net_0_Friends")
+    net_disrespect = pd.read_excel(file_name, sheet_name="net_5_Disrespect")
+    net_influential = pd.read_excel(file_name, sheet_name="net_1_Influential")
+    net_feedback = pd.read_excel(file_name, sheet_name="net_2_Feedback")
+    net_advice = pd.read_excel(file_name, sheet_name="net_4_Advice")
+    net_moretime = pd.read_excel(file_name, sheet_name="net_3_MoreTime")
+    net_affiliation = pd.read_excel(file_name, sheet_name="net_affiliation")
+
+    output_dict["survey_data"] = survey_outcome
+    output_dict["net_0_friends"] = net_friends
+    output_dict["net_5_disrespect"] = net_disrespect
+    output_dict["net_1_influential"] = net_influential
+    output_dict["net_2_feedback"] = net_feedback
+    output_dict["net_4_advice"] = net_advice
+    output_dict["net_3_moretime"] = net_moretime
+    output_dict["net_affiliation"] = net_affiliation
+    
+    return output_dict
+
+
+test_data_dict = load_test_data("/Users/basanktw/Documents/GitHub/classforge/backend/algorithm/test_data_1.xlsx")
+execute_algorithm(test_data_dict, visualize=True, save_csv=True)

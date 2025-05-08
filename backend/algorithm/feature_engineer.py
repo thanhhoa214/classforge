@@ -15,7 +15,8 @@ relationship_weights = {
     "advice": 3,
     "disrespect": -3,
     "moretime": 3,
-    "influential": 1.5
+    "influential": 1.5,
+    "feedback":1.5
 }
 
 # === Feature Engineering ===

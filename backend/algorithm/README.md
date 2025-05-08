@@ -61,6 +61,11 @@ File Descriptions
 6. execution.py
    - Main file to run the full pipeline
    - Loads data, calls all other modules, and returns final outputs
+     
+7. lang_graph.py & agent_swap_class.py
+   - The agent to work in functions = 1. Ask normal question to regard to the results, 2. ask to re-allocate student (keyword: swap, reallocate), 3. Ask to give suggestion to to specific student (For example, 'give suggestion to student 32394')
+   - To run, make sure the result files df.csv, Y_pred_df.csv, predicted_links.csv, test_data_1.xlsx, survey_predictor.pkl, agent_models_bundle.pkl are ready (check both lang_graph.py and agent_swap_class.py, bundle file from the execution.py)
+   - To run, make sure your key.env contains openAI API key.
   
    
 
@@ -73,6 +78,7 @@ Output
 - `df`: Final enriched features with well-being scores
 - `Y_pred_df`: Survey predictions + new class allocation
 - `predicted_links`: Finalised social tie predictions
+-  model_bundl, including -> survey_predictor, multilabel_link_model, embeddings, relation_to_label, relationship_weights, X_train_columns, Y_train_columns.
 
 Author
 ------

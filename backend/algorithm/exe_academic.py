@@ -43,13 +43,14 @@ torch.cuda.manual_seed_all(42)
 torch.backends.cudnn.deterministic = True
 torch.backends.cudnn.benchmark = False
 
-# === Relationship weights ===
+ # === Relationship weights ===
 relationship_weights = {
     "friends": 2,
     "advice": 3,
     "disrespect": -3,
     "moretime": 3,
-    "influential": 1.5
+    "influential": 1.5,
+    "feedback" : 1.5
 }
 
 net_dict = {
@@ -57,7 +58,8 @@ net_dict = {
     "advice": net_advice,
     "disrespect": net_disrespect,
     "moretime": net_moretime,
-    "influential": net_influential
+    "influential": net_influential,
+    "feedback":net_feedback
 }
 
 # === Step 1: Prepare Training Data ===
@@ -129,7 +131,8 @@ relation_dict = {
     "advice": list(zip(net_advice['Source'], net_advice['Target'])),
     "moretime": list(zip(net_moretime['Source'], net_moretime['Target'])),
     "influential": list(zip(net_influential['Source'], net_influential['Target'])),
-    "disrespect": list(zip(net_disrespect['Source'], net_disrespect['Target']))
+    "disrespect": list(zip(net_disrespect['Source'], net_disrespect['Target'])),
+    "feedback": list(zip(net_feedback['Source'], net_feedback['Target']))
 }
 
 # Now, build the dataset for training the model
@@ -187,6 +190,8 @@ for u, v, relation, _ in enriched_links:
     elif relation == "advice":
         weight = 20000000
     elif relation == "moretime":
+        weight = 1000
+    elif relation == "feedback":
         weight = 1000
     elif relation == "influential":
         weight = 2000
@@ -296,6 +301,21 @@ for relation, pairs in predicted_links_named.items():
 
 predicted_link_df = pd.DataFrame(flattened, columns=["Source", "Target", "Relation"])
 predicted_link_df.to_csv("predicted_links.csv", index=False) #------ Link prediction
+
+# Bundle all components into a dictionary
+model_bundle = {
+    "survey_predictor": survey_predictor,
+    "multilabel_link_model": multilabel_link_model,
+    "embeddings": embeddings,
+    "relation_to_label": relation_to_label,
+    "relationship_weights": relationship_weights,
+    "X_train_columns": list(X_train.columns),
+    "Y_train_columns": list(Y_train.columns),
+}
+
+# Save to file
+joblib.dump(model_bundle, "agent_models_bundle.pkl")
+print("agent_models_bundle.pkl saved.")
 
 def load_agent_data():
     return {

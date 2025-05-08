@@ -42,7 +42,8 @@ def visualize_predicted_network_colored(predicted_links, alloc_df, title="Predic
         "advice": "blue",
         "moretime": "purple",
         "influential": "orange",
-        "disrespect": "red"
+        "disrespect": "red",
+        "feedback" : "yellow"
     }
 
     for relation, color in relation_colors.items():

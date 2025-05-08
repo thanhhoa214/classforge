@@ -12,7 +12,6 @@ def run_algorithm(save_data = True):
                     , loaded_relationship= loaded_rela)
 
     df_output_dict = dl.get_data_from_survey()
-
     df_SNA, Y_pred_df, predicted_link_df = execute_algorithm(df_output_dict, False, False)
 
     df_SNA["Participant_ID"] = df_SNA.index
