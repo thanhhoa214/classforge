@@ -22,6 +22,18 @@ app.include_router(ws.router)
 
 # Add CORS middleware here
 
+origins = [
+    "http://localhost:3000"
+]
+
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=origins,
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
+
 @app.post("/delete-data")
 async def delete_data():
     db = get_db()
