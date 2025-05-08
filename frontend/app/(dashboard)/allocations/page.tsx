@@ -4,14 +4,11 @@ import { useState } from "react";
 import { type AllocationResult } from "./types";
 import { AlgorithmForm } from "./components/algorithm-form";
 import PreviewPanel from "./components/preview-panel";
-import { Bot, ChartColumnBig, LucideMessageCircleQuestion } from "lucide-react";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { cn } from "@/lib/utils";
+import { ChartColumnBig } from "lucide-react";
+import AiChat from "./components/ai-chat";
 
 export default function AllocationsPage() {
   const [result, setResult] = useState<AllocationResult | null>(null);
-  const [showTips, setShowTips] = useState(false);
 
   return (
     <div>
@@ -30,44 +27,27 @@ export default function AllocationsPage() {
           Allocation Result
         </h2>
         {result ? (
-          <>
-            <p className="text-muted-foreground text-center text-sm">
-              Here is the allocation result based on your selected criteria. You
-              can freely update it or ask our AI to explain reasons behind the
-              allocation.
-            </p>
-            <form className="flex items-center gap-2 max-w-xl mx-auto mt-4">
-              <Bot size={32} />
-              <Input placeholder="Ask me anything about the allocation..." />
-              <Button>Send</Button>
-            </form>
-
-            <p className="text-sm text-muted-foreground text-center">
-              <Button variant={"link"} onClick={() => setShowTips(!showTips)}>
-                Want to see some tips? <LucideMessageCircleQuestion />
-              </Button>
-            </p>
-            <ul
-              className={cn(
-                "list-decimal list-inside text-sm text-muted-foreground max-w-xl mx-auto",
-                showTips ? "block" : "hidden"
-              )}
-            >
-              <li>Ask normal question to regard to the results</li>
-              <li>Ask to re-allocate student (keyword: swap, reallocate)</li>
-              <li>
-                Ask to give suggestion to to specific student (&apos;give
-                suggestion to student 32394&apos;)
-              </li>
-            </ul>
-            <PreviewPanel result={result} />
-          </>
+          <p className="text-muted-foreground text-center text-sm">
+            Here is the allocation result based on your selected criteria. You
+            can freely update it or ask our AI to explain reasons behind the
+            allocation.
+          </p>
         ) : (
           <p className="text-muted-foreground text-center mt-4 p-16 border-2 border-dashed rounded-lg">
             <ChartColumnBig size={40} className="mx-auto mb-2" />
             The allocation result will be displayed here after you generate it.
           </p>
         )}
+        <div className="flex items-start gap-4 mt-4">
+          {result && (
+            <>
+              <div className="w-3/4">
+                <PreviewPanel result={result} />
+              </div>
+              <AiChat />
+            </>
+          )}
+        </div>
       </div>
     </div>
   );

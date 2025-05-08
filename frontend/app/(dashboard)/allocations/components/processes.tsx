@@ -3,6 +3,7 @@ import { neo4jDriver, ProcessNode } from "@/lib/neo4j";
 import { useQuery } from "@tanstack/react-query";
 import { ArrowUpRightFromSquareIcon } from "lucide-react";
 import Link from "next/link";
+import { startCase } from "lodash-es";
 
 export default function Processes() {
   const { data } = useQuery({
@@ -32,7 +33,7 @@ export default function Processes() {
             />
             <ul className="text-xs mb-2">
               <li className="px-2 py-0.5 rounded-full bg-green-100 border border-green-700 inline-block">
-                {processRun.run_type}
+                {startCase(processRun.run_type)}
               </li>
             </ul>
             <div className="flex items-end justify-between">

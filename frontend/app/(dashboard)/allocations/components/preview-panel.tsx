@@ -1,13 +1,4 @@
 "use client";
-import {
-  Table,
-  TableBody,
-  TableCaption,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
-} from "@/components/ui/table";
 import { Card, CardContent, CardHeader } from "@/components/ui/card";
 import {
   ProcessedStudent,
@@ -22,22 +13,16 @@ import {
   PolarAngleAxis,
   PolarRadiusAxis,
   XAxis,
-  YAxis,
   Tooltip,
   ResponsiveContainer,
   Legend,
 } from "recharts";
 import { AllocationResult } from "../types";
-import {
-  Select,
-  SelectTrigger,
-  SelectContent,
-  SelectItem,
-  SelectValue,
-} from "@/components/ui/select";
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useState } from "react";
+import { StudentDataTable } from "../../students/components/student-data-table";
+import ParticipantNetwork from "../../students/components/participant-network";
 import { formatNumber } from "@/lib/utils";
-import { Button } from "@/components/ui/button";
+import { startCase } from "lodash-es";
 
 const RadarMetric = ({ student }: { student: ProcessedStudent }) => {
   const data = [
@@ -76,15 +61,12 @@ export default function PreviewPanel({ result }: { result: AllocationResult }) {
   );
 
   return (
-    <div className="flex *:w-1/2 gap-4 p-6">
+    <div className="flex flex-col gap-4">
       <Card>
         <CardContent>
-          <h2 className="text-xl font-semibold mb-4">Class Overview</h2>
-
-          <ResponsiveContainer width="100%" height={300}>
+          <ResponsiveContainer width="100%" height={200}>
             <BarChart data={[result.metrics]}>
               <XAxis dataKey="name" hide />
-              <YAxis />
               <Tooltip />
               <Legend />
 
@@ -108,100 +90,80 @@ export default function PreviewPanel({ result }: { result: AllocationResult }) {
               />
             </BarChart>
           </ResponsiveContainer>
+
+          {students && (
+            <StudentDataTable
+              processId={result.processId}
+              className="flex-col"
+              onSelectedIdChange={(id) =>
+                setSelectedStudentId(id ? id + "" : undefined)
+              }
+            />
+          )}
         </CardContent>
       </Card>
-
-      {students && <StudentsTableCard students={students} />}
-
       {selectedStudent && (
         <Card>
           <CardHeader>
             {students && students.length > 0 && (
               <div className="mb-4">
-                <h2 className="text-xl font-semibold mb-4">Student Overview</h2>
-                <Select
-                  value={selectedStudentId}
-                  onValueChange={setSelectedStudentId}
-                >
-                  <SelectTrigger className="w-full max-w-md">
-                    <SelectValue placeholder="Select a student" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {students.map((s) => (
-                      <SelectItem
-                        key={s.participantId}
-                        value={String(s.participantId)}
-                      >
-                        {s.name}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
+                <h2 className="text-xl font-semibold mb-4">
+                  {selectedStudent.name} (#{selectedStudent.participantId})
+                </h2>
+                <p className="text-muted-foreground">
+                  This student has been allocated to group{" "}
+                  {selectedStudent.house} with a score of{" "}
+                  {formatNumber(selectedStudent.academicScore)} in academics,{" "}
+                  {formatNumber(selectedStudent.socialScore)} in social
+                  interactions, and {formatNumber(selectedStudent.mentalScore)}{" "}
+                  in mental well-being.
+                </p>
               </div>
             )}
           </CardHeader>
-          <CardContent className="flex flex-col items-center">
-            <RadarMetric student={selectedStudent} />
+          <CardContent>
+            <div className="flex gap-2">
+              <div className="flex flex-col gap-2">
+                <div className="flex justify-center items-end bg-white rounded-lg border grow min-w-80 aspect-square">
+                  <RadarMetric student={selectedStudent} />
+                </div>
+                <p className="text-center text-sm text-muted-foreground mt-1">
+                  Student Scores
+                </p>
+              </div>
+              <div>
+                <ParticipantNetwork
+                  participantIds={[selectedStudent.participantId]}
+                  showDetails={false}
+                  className="min-w-80 min-h-80"
+                />
+                <p className="text-center text-sm text-muted-foreground mt-1">
+                  Student Relationships
+                </p>
+              </div>
+            </div>
+
+            <h3 className="text-center text-lg font-semibold mt-4">
+              Detail Metrics
+            </h3>
+            <ul className="grid grid-cols-3 gap-x-8 w-full mt-2 border-2 rounded-lg p-2">
+              {Object.entries(selectedStudent.metrics).map(([key, value]) => (
+                <li
+                  key={key}
+                  className="flex justify-between items-center gap-1 text-muted-foreground"
+                >
+                  <span>{startCase(key)}:</span>
+                  <strong className="font-semibold">
+                    {formatNumber(
+                      typeof value === "number" ? value : value.low
+                    )}
+                  </strong>
+                </li>
+              ))}
+            </ul>
           </CardContent>
         </Card>
       )}
     </div>
-  );
-}
-
-function StudentsTableCard({ students }: { students: ProcessedStudent[] }) {
-  const [randomSeed, setRandomSeed] = useState<number>(1);
-
-  const random15Students = useMemo(() => {
-    return (
-      students &&
-      Array.from({ length: 10 }, () =>
-        Math.floor(Math.random() * (students.length || 1) * randomSeed)
-      ).map((index) => students[index])
-    );
-  }, [students, randomSeed]);
-
-  return (
-    <Card>
-      <CardContent>
-        <div className="overflow-x-auto">
-          <Table>
-            <TableCaption>
-              A shortlist of students.{" "}
-              <Button
-                variant={"link"}
-                onClick={() => setRandomSeed((prev) => prev + 0.000000000001)}
-              >
-                Randomize
-              </Button>{" "}
-            </TableCaption>
-            <TableHeader>
-              <TableRow>
-                <TableHead>Name</TableHead>
-                <TableHead className="text-right">Academic</TableHead>
-                <TableHead className="text-right">Social</TableHead>
-                <TableHead className="text-right">Mental</TableHead>
-              </TableRow>
-            </TableHeader>
-            <TableBody>
-              {random15Students?.slice(0, 10).map((student) => (
-                <TableRow key={student.participantId}>
-                  <TableCell>{student.name}</TableCell>
-                  <TableCell className="text-right text-muted-foreground">
-                    {formatNumber(student.academicScore)}
-                  </TableCell>
-                  <TableCell className="text-right text-muted-foreground">
-                    {formatNumber(student.socialScore)}
-                  </TableCell>
-                  <TableCell className="text-right text-muted-foreground">
-                    {formatNumber(student.mentalScore)}
-                  </TableCell>
-                </TableRow>
-              ))}
-            </TableBody>
-          </Table>
-        </div>
-      </CardContent>
-    </Card>
   );
 }

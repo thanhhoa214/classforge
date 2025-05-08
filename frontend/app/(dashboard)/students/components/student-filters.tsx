@@ -44,6 +44,7 @@ export function StudentFilters({
     <div className="flex gap-4 items-center">
       <div className="flex-1">
         <Input
+          className="h-10"
           placeholder="Search students..."
           value={filters.search ?? ""}
           onChange={(e) => handleFilterChange({ search: e.target.value })}

@@ -40,7 +40,7 @@ export function AlgorithmForm({ onResult }: AlgorithmFormProps) {
       onResult({
         processId: 2,
         metrics: {
-          overallScore: 75,
+          overallScore: 0.75,
           academicBalance: 0.82,
           socialBalance: 0.77,
         },
@@ -81,7 +81,7 @@ export function AlgorithmForm({ onResult }: AlgorithmFormProps) {
               <strong className="font-semibold">
                 {o.label.charAt(0).toUpperCase() + o.label.slice(1)}
               </strong>
-              <p className="text-sm font-light mt-2 text-center border-t pt-1">
+              <p className="text-sm font-light mt-2 text-center border-t pt-1 px-3">
                 {o.description}
               </p>
             </label>

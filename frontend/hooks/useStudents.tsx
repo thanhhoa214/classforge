@@ -7,7 +7,7 @@ export function useStudentsApi() {
   return useStudentsApiFromProcessId(processId);
 }
 
-export function useStudentsApiFromProcessId(processId: number) {
+export function useStudentsApiFromProcessId(processId?: number) {
   return useQuery({
     queryKey: ["students", processId],
     queryFn: async () => {
@@ -26,6 +26,7 @@ export function useStudentsApiFromProcessId(processId: number) {
           academicScore: metric.academic_score,
           mentalScore: metric.mental_score,
           socialScore: metric.social_score,
+          metrics: metric,
         };
       });
 
