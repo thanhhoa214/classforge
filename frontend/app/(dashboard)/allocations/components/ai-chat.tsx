@@ -8,9 +8,19 @@ import {
   CardContent,
 } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
+import { ApiQueryClient } from "@/lib/api";
 import { cn } from "@/lib/utils";
-import { Bot, User, LucideMessageCircleQuestion, Info } from "lucide-react";
+import { useLocalStorage } from "@uidotdev/usehooks";
+import {
+  Bot,
+  User,
+  LucideMessageCircleQuestion,
+  Info,
+  Loader2,
+} from "lucide-react";
 import { useState } from "react";
+import ReactMarkdown from "react-markdown";
+import { getReallocationSuggestion } from "@/app/actions/openai";
 
 interface ChatMessage {
   id: string;
@@ -20,26 +30,9 @@ interface ChatMessage {
 
 const mockMessages: ChatMessage[] = [
   {
-    id: "1",
-    sender: "user",
-    content: "Why was student 32394 placed in group A?",
-  },
-  {
     id: "2",
     sender: "bot",
-    content:
-      "Student 32394 was placed in group A to balance skill levels and maintain existing positive connections.",
-  },
-  {
-    id: "3",
-    sender: "user",
-    content: "Can you suggest improvements for group B?",
-  },
-  {
-    id: "4",
-    sender: "bot",
-    content:
-      "Consider swapping student 32401 with 32398 to improve group cohesion in group B.",
+    content: "Hi, I'm the AI bot. How can I help you today?",
   },
 ];
 
@@ -49,6 +42,7 @@ interface ChatMessageProps {
 
 function ChatBubble({ message }: ChatMessageProps) {
   const isUser = message.sender === "user";
+
   return (
     <div
       className={cn(
@@ -70,7 +64,7 @@ function ChatBubble({ message }: ChatMessageProps) {
         )}
         aria-label={isUser ? "User message" : "AI message"}
       >
-        {message.content}
+        <ReactMarkdown>{message.content}</ReactMarkdown>
       </div>
       {isUser && (
         <span className="rounded-full bg-primary p-1">
@@ -85,8 +79,56 @@ function ChatBubble({ message }: ChatMessageProps) {
   );
 }
 
-export default function AiChat() {
+export default function AiChat({
+  processId,
+  onProcessIdChange,
+}: {
+  processId: number;
+  onProcessIdChange: (processId: number) => void;
+}) {
   const [showTips, setShowTips] = useState(false);
+  const [messages, setMessages] = useLocalStorage<ChatMessage[]>(
+    `ai-chat-messages-${processId}`,
+    mockMessages
+  );
+  const { mutateAsync: sendMessage, isPending } = ApiQueryClient.useMutation(
+    "post",
+    "/chat"
+  );
+  const { mutateAsync: reallocate, isPending: isReallocating } =
+    ApiQueryClient.useMutation("post", "/reallocate");
+  const { mutateAsync: applyChanges, isPending: isApplyingChanges } =
+    ApiQueryClient.useMutation("post", "/reallocate/save");
+  const onSendMessage = async (message: string) => {
+    const newMessages = [
+      ...messages,
+      { id: Date.now().toString(), sender: "user", content: message },
+    ] as ChatMessage[];
+    setMessages(newMessages);
+
+    const parsed = await getReallocationSuggestion(message);
+
+    if (parsed) {
+      const response = await reallocate({
+        body: { target_id: parsed.target_id, class_id: parsed.class_id },
+      });
+      onProcessIdChange(response.process_id);
+      setMessages([
+        ...newMessages,
+        {
+          id: Date.now().toString(),
+          sender: "bot",
+          content: parsed.suggestion,
+        },
+      ]);
+    } else {
+      const res = await sendMessage({ body: { message } });
+      setMessages([
+        ...newMessages,
+        { id: Date.now().toString(), sender: "bot", content: res.response },
+      ]);
+    }
+  };
 
   return (
     <Card className="w-full max-w-md flex flex-col min-h-[32rem]">
@@ -119,23 +161,35 @@ export default function AiChat() {
       </CardHeader>
       <CardContent className="flex-1 flex flex-col px-4 pb-2">
         <div
-          className="flex-1 overflow-y-auto space-y-2 mb-2 pr-1"
+          className="flex-1 overflow-y-auto space-y-2 mb-2 pr-1 max-h-[32rem]"
           role="log"
           aria-live="polite"
         >
-          {mockMessages.map((msg) => (
+          {messages.map((msg) => (
             <ChatBubble key={msg.id} message={msg} />
           ))}
         </div>
         <form
           className="flex items-center gap-2 pt-2 border-t border-muted"
-          onSubmit={(e) => e.preventDefault()}
+          onSubmit={(e) => {
+            e.preventDefault();
+            const formData = new FormData(e.target as HTMLFormElement);
+            const message = formData.get("message") as string;
+            onSendMessage(message);
+          }}
         >
           <Input
             placeholder="Ask me anything about the allocation..."
             className="flex-1"
+            name="message"
           />
-          <Button type="submit">Send</Button>
+          <Button type="submit" disabled={isPending || isReallocating}>
+            {isPending || isReallocating ? (
+              <Loader2 className="animate-spin" />
+            ) : (
+              "Send"
+            )}
+          </Button>
         </form>
         <p className="text-xs text-muted-foreground mt-1">
           <Info size={14} className="inline-block mb-px" /> Changes from AI bot
@@ -145,8 +199,17 @@ export default function AiChat() {
         <h3 className="font-semibold text-sm text-center mt-6">
           When you are done, please apply changes by clicking
         </h3>
-        <Button variant={"secondary"} className="w-full mt-2">
-          Apply changes
+        <Button
+          variant={"secondary"}
+          className="w-full mt-2"
+          onClick={() => applyChanges({ body: { process_id: processId } })}
+          disabled={isApplyingChanges}
+        >
+          {isApplyingChanges ? (
+            <Loader2 className="animate-spin" />
+          ) : (
+            "Apply changes"
+          )}
         </Button>
       </CardContent>
     </Card>

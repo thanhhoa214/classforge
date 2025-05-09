@@ -1,4 +1,5 @@
 import {
+  Metric,
   neo4jDriver,
   NetworkType,
   ParticipantNode,
@@ -103,4 +104,16 @@ export async function getNeo4jData(
   }
 
   return { nodes, edges };
+}
+
+export async function getMetric(processId: number) {
+  const query = `
+  MATCH (pr:ProcessRun)-[:computed_metric]->(m:Metric) 
+  WHERE pr.id = ${processId}
+  RETURN m`;
+  const result = await neo4jDriver.executeQuery(query);
+  const { academic_score, social_score, mental_score } = result.records[0].get(
+    "m"
+  ).properties as Metric;
+  return { academic_score, social_score, mental_score };
 }

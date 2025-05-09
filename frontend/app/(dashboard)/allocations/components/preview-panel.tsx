@@ -17,12 +17,17 @@ import {
   ResponsiveContainer,
   Legend,
 } from "recharts";
-import { AllocationResult } from "../types";
 import { useEffect, useState } from "react";
 import { StudentDataTable } from "../../students/components/student-data-table";
 import ParticipantNetwork from "../../students/components/participant-network";
 import { formatNumber } from "@/lib/utils";
 import { startCase } from "lodash-es";
+import { Metric } from "@/lib/neo4j";
+
+export interface AllocationResult {
+  processId: number;
+  metrics: Metric;
+}
 
 const RadarMetric = ({ student }: { student: ProcessedStudent }) => {
   const data = [
@@ -70,24 +75,21 @@ export default function PreviewPanel({ result }: { result: AllocationResult }) {
               <Tooltip />
               <Legend />
 
-              <Bar
-                dataKey="overallScore"
-                fill="#4f46e5"
-                name="Overall Score"
-                barSize={30}
-              />
-              <Bar
-                dataKey="academicBalance"
-                fill="#10b981"
-                name="Academic Balance"
-                barSize={30}
-              />
-              <Bar
-                dataKey="socialBalance"
-                fill="#f59e0b"
-                name="Social Balance"
-                barSize={30}
-              />
+              {Object.entries(result.metrics).map(([key]) => (
+                <Bar
+                  key={key}
+                  dataKey={key as keyof Metric}
+                  fill={
+                    key === "academic_score"
+                      ? "#10b981"
+                      : key === "social_score"
+                      ? "#f59e0b"
+                      : "#3b82f6"
+                  }
+                  name={startCase(key)}
+                  barSize={30}
+                />
+              ))}
             </BarChart>
           </ResponsiveContainer>
 

@@ -74,10 +74,17 @@ export interface paths {
       path?: never;
       cookie?: never;
     };
-    /** Run */
-    get: operations["run_run_get"];
+    get?: never;
     put?: never;
-    post?: never;
+    /**
+     * Run Algo
+     * @description Run the algorithm with the given option and save data if specified.
+     *     There are 4 options: balanced, academic, mental, social.
+     *     The algorithm will be run in the background and a job ID will be returned.
+     *     use save_data to save the data to the database or not.
+     *     Use the job ID to check the status of the job.
+     */
+    post: operations["run_algo_run_post"];
     delete?: never;
     options?: never;
     head?: never;
@@ -224,6 +231,11 @@ export interface components {
       /** Detail */
       detail?: components["schemas"]["ValidationError"][];
     };
+    /**
+     * OptionEnum
+     * @enum {string}
+     */
+    OptionEnum: "balanced" | "academic" | "mental" | "social";
     /** ReallocateRequest */
     ReallocateRequest: {
       /** Target Id */
@@ -240,6 +252,16 @@ export interface components {
       /** Process Id */
       process_id: number;
     };
+    /** RunAlgorithmRequest */
+    RunAlgorithmRequest: {
+      /** @default balanced */
+      option: components["schemas"]["OptionEnum"];
+      /**
+       * Save Data
+       * @default true
+       */
+      save_data: boolean;
+    };
     /** SaveReallocationRequest */
     SaveReallocationRequest: {
       /** Process Id */
@@ -248,7 +270,7 @@ export interface components {
     /** SaveReallocationResponse */
     SaveReallocationResponse: {
       /** Status */
-      status: string;
+      status: "success" | "failed";
       /** Process Id */
       process_id?: number | null;
     };
@@ -358,14 +380,18 @@ export interface operations {
       };
     };
   };
-  run_run_get: {
+  run_algo_run_post: {
     parameters: {
       query?: never;
       header?: never;
       path?: never;
       cookie?: never;
     };
-    requestBody?: never;
+    requestBody: {
+      content: {
+        "application/json": components["schemas"]["RunAlgorithmRequest"];
+      };
+    };
     responses: {
       /** @description Successful Response */
       200: {
@@ -376,6 +402,15 @@ export interface operations {
           "application/json": {
             job_id: number;
           };
+        };
+      };
+      /** @description Validation Error */
+      422: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["HTTPValidationError"];
         };
       };
     };
@@ -403,7 +438,8 @@ export interface operations {
               }
             | {
                 status: "completed";
-                result: unknown;
+                /** Process Id */
+                result: number;
               };
         };
       };

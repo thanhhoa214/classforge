@@ -1,15 +1,47 @@
 "use client";
 
-import { useState } from "react";
-import { type AllocationResult } from "./types";
 import { AlgorithmForm } from "./components/algorithm-form";
-import PreviewPanel from "./components/preview-panel";
-import { ChartColumnBig } from "lucide-react";
+import PreviewPanel, { AllocationResult } from "./components/preview-panel";
+import { ChartColumnBig, TriangleAlert } from "lucide-react";
 import AiChat from "./components/ai-chat";
+import { ApiQueryClient } from "@/lib/api";
+import { useQuery } from "@tanstack/react-query";
+import { getMetric } from "@/app/actions/network";
+import { useLocalStorage } from "@uidotdev/usehooks";
+import { useEffect, useState } from "react";
 
 export default function AllocationsPage() {
-  const [result, setResult] = useState<AllocationResult | null>(null);
+  const [jobId, setJobId] = useLocalStorage<number>("jobId", undefined);
+  const { data: jobStatus, isLoading: isJobStatusLoading } =
+    ApiQueryClient.useQuery(
+      "get",
+      "/job-status/{job_id}",
+      { params: { path: { job_id: jobId + "" } } },
+      {
+        enabled: !!jobId,
+        refetchInterval: (data) => {
+          if (data?.state.data?.status === "failed") return false;
+          return 5_000;
+        },
+      }
+    );
 
+  const [processId, setProcessId] = useState<number>();
+
+  useEffect(() => {
+    if (jobStatus?.status === "completed") setProcessId(jobStatus.result);
+  }, [jobStatus]);
+
+  const { data: metric, isLoading: isMetricLoading } = useQuery({
+    queryKey: ["metric", processId],
+    queryFn: () => getMetric(processId!),
+    enabled: !!processId,
+  });
+  const result: AllocationResult | undefined =
+    processId && metric ? { processId, metrics: metric } : undefined;
+
+  const isLoading =
+    isJobStatusLoading || isMetricLoading || jobStatus?.status === "processing";
   return (
     <div>
       <div className="mb-8 text-center">
@@ -20,7 +52,16 @@ export default function AllocationsPage() {
       </div>
 
       <div className="w-4/5 max-w-5xl mx-auto mb-12">
-        <AlgorithmForm onResult={setResult} />
+        <AlgorithmForm
+          onResult={(r) => setJobId(r.job_id)}
+          isLoading={isLoading}
+        />
+        {jobStatus?.status === "failed" && (
+          <p className="text-red-500 text-center mt-2 flex justify-center items-center gap-2">
+            <TriangleAlert size={20} /> Failed to generate allocation. Please
+            try again.
+          </p>
+        )}
       </div>
       <div>
         <h2 className="text-2xl font-bold mb-1 text-center">
@@ -44,7 +85,10 @@ export default function AllocationsPage() {
               <div className="w-3/4">
                 <PreviewPanel result={result} />
               </div>
-              <AiChat />
+              <AiChat
+                processId={result.processId}
+                onProcessIdChange={setProcessId}
+              />
             </>
           )}
         </div>

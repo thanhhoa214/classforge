@@ -1,17 +1,25 @@
 "use client";
 
 import { Button } from "@/components/ui/button";
-import { type AllocationResult } from "../types";
 import { toast } from "sonner";
 import { useState } from "react";
 import { ApiQueryClient } from "@/lib/api";
+import { components, paths } from "@/lib/api/swagger";
+import { Loader2 } from "lucide-react";
 
 interface AlgorithmFormProps {
-  onResult: (result: AllocationResult) => void;
+  isLoading: boolean;
+  onResult: (
+    result: paths["/run"]["post"]["responses"]["200"]["content"]["application/json"]
+  ) => void;
 }
-const priorityOptions = [
+const priorityOptions: {
+  value: components["schemas"]["OptionEnum"];
+  label: string;
+  description: string;
+}[] = [
   {
-    value: "balance",
+    value: "balanced",
     label: "Balanced Approach",
     description: "Equitable resource distribution for diverse needs",
   },
@@ -32,28 +40,22 @@ const priorityOptions = [
   },
 ];
 
-export function AlgorithmForm({ onResult }: AlgorithmFormProps) {
+export function AlgorithmForm({ onResult, isLoading }: AlgorithmFormProps) {
   const [option, setOption] = useState(priorityOptions[0].value);
   const { mutate: reallocate, isPending } = ApiQueryClient.useMutation(
-    "get",
+    "post",
     "/run",
-    {
-      onSuccess: (data) => {
-        onResult(data);
-      },
-    }
+    { onSuccess: onResult }
   );
-  const onSubmit: React.FormEventHandler = async (e) => {
+
+  const onSubmit: React.FormEventHandler<HTMLFormElement> = async (e) => {
     e.preventDefault();
+
+    const priority = (e.target as HTMLFormElement).priority
+      .value as components["schemas"]["OptionEnum"];
+
     try {
-      onResult({
-        processId: 2,
-        metrics: {
-          overallScore: 0.75,
-          academicBalance: 0.82,
-          socialBalance: 0.77,
-        },
-      });
+      reallocate({ body: { option: priority, save_data: true } });
       toast.success("Allocation Generated", {
         description:
           "The classroom allocation has been generated successfully.",
@@ -69,9 +71,11 @@ export function AlgorithmForm({ onResult }: AlgorithmFormProps) {
   };
 
   return (
-    <form onSubmit={onSubmit} className="space-y-4 text-center">
-      <p className="text-muted-foreground">What criteria do you prioritize?</p>
-      <div className="flex gap-3 mt-2">
+    <form onSubmit={onSubmit} className="text-center">
+      <p className="text-muted-foreground mb-2">
+        What criteria do you prioritize?
+      </p>
+      <div className="flex gap-3 mb-8">
         {priorityOptions.map((o) => (
           <div key={o.value} className="w-1/4 flex flex-col">
             <input
@@ -81,7 +85,9 @@ export function AlgorithmForm({ onResult }: AlgorithmFormProps) {
               className="h-4 w-4 sr-only peer"
               value={o.value}
               checked={o.value === option}
-              onChange={(e) => setOption(e.target.value)}
+              onChange={(e) =>
+                setOption(e.target.value as components["schemas"]["OptionEnum"])
+              }
             />
             <label
               htmlFor={o.value}
@@ -98,9 +104,24 @@ export function AlgorithmForm({ onResult }: AlgorithmFormProps) {
         ))}
       </div>
 
-      <Button type="submit" size={"lg"} className="text-base">
-        Generate Allocation
+      <Button
+        type="submit"
+        size={"lg"}
+        className="text-base mb-2"
+        disabled={isPending || isLoading}
+      >
+        {isPending || isLoading ? (
+          <>
+            <Loader2 className="animate-spin" /> Generating...
+          </>
+        ) : (
+          "Generate Allocation"
+        )}
       </Button>
+      <p className="text-muted-foreground text-sm">
+        It may take minutes to generate the allocation. Please do not refresh
+        the page.
+      </p>
     </form>
   );
 }
