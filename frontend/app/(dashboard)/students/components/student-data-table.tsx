@@ -21,6 +21,7 @@ import { StudentFilters, StudentFiltersType } from "./student-filters";
 import { Loader2 } from "lucide-react";
 import { cn, formatNumber } from "@/lib/utils";
 import { useStudentsApiFromProcessId } from "@/hooks/useStudents";
+import { TooltipWrapInfo } from "@/components/ui2/TooltipWrap";
 
 export function StudentDataTable({
   processId,
@@ -124,9 +125,34 @@ export function StudentDataTable({
             <TableHead>Participant ID</TableHead>
             <TableHead>Name</TableHead>
             <TableHead>House</TableHead>
+            <TableHead>
+              Attendance{" "}
+              <TooltipWrapInfo
+                content={
+                  "This number shows how many days the student has attended school"
+                }
+              />
+            </TableHead>
+            <TableHead>Academic Percentage</TableHead>
             <TableHead className="text-right">Academic Score</TableHead>
             <TableHead className="text-right">Mental Score</TableHead>
             <TableHead className="text-right">Social Score</TableHead>
+            <TableHead>
+              Disrespect{" "}
+              <TooltipWrapInfo
+                content={
+                  "This number shows how many people want to bully the student"
+                }
+              />
+            </TableHead>
+            <TableHead>
+              Friends{" "}
+              <TooltipWrapInfo
+                content={
+                  "This number shows how many people want to be friends with the student"
+                }
+              />
+            </TableHead>
           </TableRow>
         </TableHeader>
         <TableBody>
@@ -152,6 +178,12 @@ export function StudentDataTable({
                 <TableCell>{student.name}</TableCell>
                 <TableCell>{student.house}</TableCell>
                 <TableCell className="text-right">
+                  {formatNumber(student.attendance)}
+                </TableCell>
+                <TableCell className="text-right">
+                  {formatNumber(student.performancePercentage)}
+                </TableCell>
+                <TableCell className="text-right">
                   {formatNumber(student.academicScore)}
                 </TableCell>
                 <TableCell className="text-right">
@@ -159,6 +191,12 @@ export function StudentDataTable({
                 </TableCell>
                 <TableCell className="text-right">
                   {formatNumber(student.socialScore)}
+                </TableCell>
+                <TableCell className="text-right">
+                  {formatNumber(student.disrespect)}
+                </TableCell>
+                <TableCell className="text-right">
+                  {formatNumber(student.friends)}
                 </TableCell>
               </TableRow>
             ))

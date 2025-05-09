@@ -10,7 +10,6 @@ import {
 import { Input } from "@/components/ui/input";
 import { ApiQueryClient } from "@/lib/api";
 import { cn } from "@/lib/utils";
-import { useLocalStorage } from "@uidotdev/usehooks";
 import {
   Bot,
   User,
@@ -21,6 +20,7 @@ import {
 import { useState } from "react";
 import ReactMarkdown from "react-markdown";
 import { getReallocationSuggestion } from "@/app/actions/openai";
+import { useLocalStorage } from "usehooks-ts";
 
 interface ChatMessage {
   id: string;
@@ -89,7 +89,8 @@ export default function AiChat({
   const [showTips, setShowTips] = useState(false);
   const [messages, setMessages] = useLocalStorage<ChatMessage[]>(
     `ai-chat-messages-${processId}`,
-    mockMessages
+    mockMessages,
+    { initializeWithValue: false }
   );
   const { mutateAsync: sendMessage, isPending } = ApiQueryClient.useMutation(
     "post",

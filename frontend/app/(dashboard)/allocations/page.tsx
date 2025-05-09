@@ -7,11 +7,15 @@ import AiChat from "./components/ai-chat";
 import { ApiQueryClient } from "@/lib/api";
 import { useQuery } from "@tanstack/react-query";
 import { getMetric } from "@/app/actions/network";
-import { useLocalStorage } from "@uidotdev/usehooks";
 import { useEffect, useState } from "react";
+import { useLocalStorage } from "usehooks-ts";
 
 export default function AllocationsPage() {
-  const [jobId, setJobId] = useLocalStorage<number>("jobId", undefined);
+  const [jobId, setJobId] = useLocalStorage<number | undefined>(
+    "jobId",
+    undefined,
+    { initializeWithValue: false }
+  );
   const { data: jobStatus, isLoading: isJobStatusLoading } =
     ApiQueryClient.useQuery(
       "get",
@@ -38,7 +42,16 @@ export default function AllocationsPage() {
     enabled: !!processId,
   });
   const result: AllocationResult | undefined =
-    processId && metric ? { processId, metrics: metric } : undefined;
+    processId && metric
+      ? {
+          processId,
+          metrics: {
+            academic_score: metric.academic_score,
+            social_score: metric.social_score,
+            mental_score: metric.mental_score,
+          },
+        }
+      : undefined;
 
   const isLoading =
     isJobStatusLoading || isMetricLoading || jobStatus?.status === "processing";

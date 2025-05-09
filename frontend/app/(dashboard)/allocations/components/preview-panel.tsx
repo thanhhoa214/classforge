@@ -26,7 +26,11 @@ import { Metric } from "@/lib/neo4j";
 
 export interface AllocationResult {
   processId: number;
-  metrics: Metric;
+  metrics: {
+    academic_score: number;
+    social_score: number;
+    mental_score: number;
+  };
 }
 
 const RadarMetric = ({ student }: { student: ProcessedStudent }) => {

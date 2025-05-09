@@ -6,6 +6,7 @@ import NetworkOverview from "./NetworkOverview";
 import { FetchClient } from "@/lib/api";
 import { useQuery } from "@tanstack/react-query";
 import { formatNumber } from "@/lib/utils";
+import { Suspense } from "react";
 
 export default function DashboardPage() {
   const { data: participantCount } = useQuery({
@@ -88,7 +89,9 @@ export default function DashboardPage() {
             <p className="text-sm text-muted-foreground mb-2">
               Toggle students to view their connections
             </p>
-            <NetworkOverview />
+            <Suspense fallback={<div>Loading...</div>}>
+              <NetworkOverview />
+            </Suspense>
           </CardContent>
         </Card>
       </div>

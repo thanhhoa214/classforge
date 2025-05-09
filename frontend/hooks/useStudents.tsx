@@ -1,6 +1,11 @@
 import { useQuery } from "@tanstack/react-query";
 import { useProcessId } from "./useProcessId";
-import { neo4jDriver, ParticipantNode, MetricNode } from "@/lib/neo4j";
+import {
+  neo4jDriver,
+  ParticipantNode,
+  MetricNode,
+  SurveyDataNode,
+} from "@/lib/neo4j";
 
 export function useStudentsApi() {
   const { processId } = useProcessId();
@@ -13,12 +18,15 @@ export function useStudentsApiFromProcessId(processId?: number) {
     queryFn: async () => {
       const result = await neo4jDriver.executeQuery(`
             MATCH (pr:ProcessRun)-[]-(m:Metric)-[:has_metric {}]-(p:Participant)
+            MATCH (pr)-[:computed_data]->(sd:SurveyData)-[:has_data]->(p)
             WHERE pr.id = ${processId}
-            RETURN m, p
+            RETURN m, p, sd
         `);
       const students = result.records.map((record) => {
         const participant = (record.get("p") as ParticipantNode).properties;
         const metric = (record.get("m") as MetricNode).properties;
+        const surveyData = (record.get("sd") as SurveyDataNode).properties;
+
         return {
           house: participant.house,
           name: `${participant.first_name} ${participant.last_name}`,
@@ -26,6 +34,10 @@ export function useStudentsApiFromProcessId(processId?: number) {
           academicScore: metric.academic_score,
           mentalScore: metric.mental_score,
           socialScore: metric.social_score,
+          attendance: surveyData.attendance,
+          performancePercentage: surveyData.perc_academic,
+          disrespect: metric.disrespect_in_degree,
+          friends: metric.friends_in_degree,
           metrics: metric,
         };
       });

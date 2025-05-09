@@ -118,6 +118,7 @@ const GraphEvents: React.FC<{
 
   useEffect(() => {
     registerEvents({ clickNode: (event) => onNodeClick?.(event.node) });
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [registerEvents]);
 
   return null;
