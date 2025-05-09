@@ -111,7 +111,7 @@ def predict_multilabel_links_using_embeddings_and_classes(
 
     return predicted_links
 
-def train_multilabel_link_classifier(X, Y, hidden_dim=128, epochs=400, lr=0.00001, relation_to_label=None):
+def train_multilabel_link_classifier(X, Y, hidden_dim=128, epochs=350, lr=0.00005, relation_to_label=None):
     input_dim = X.size(1)
     num_classes = Y.size(1)
 

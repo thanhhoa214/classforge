@@ -31,7 +31,7 @@ def execute_algorithm(file_input_dict: dict[str, pd.DataFrame], visualize: bool 
     net_friends = file_input_dict["net_0_friends"]
     net_disrespect = file_input_dict["net_5_disrespect"]
     net_influential = file_input_dict["net_1_influential"]
-    net_feedback = file_input_dict["net_2_feedback"]
+    #net_feedback = file_input_dict["net_2_feedback"]
     net_advice = file_input_dict["net_4_advice"]
     net_moretime = file_input_dict["net_3_moretime"]
     net_affiliation = file_input_dict["net_affiliation"]
@@ -49,8 +49,7 @@ def execute_algorithm(file_input_dict: dict[str, pd.DataFrame], visualize: bool 
         "advice": 3,
         "disrespect": -3,
         "moretime": 3,
-        "influential": 1.5,
-        "feedback" : 1.5
+        "influential": 1.5
     }
 
     net_dict = {
@@ -59,7 +58,6 @@ def execute_algorithm(file_input_dict: dict[str, pd.DataFrame], visualize: bool 
         "disrespect": net_disrespect,
         "moretime": net_moretime,
         "influential": net_influential,
-        "feedback":net_feedback
     }
 
     # === Step 1: Prepare Training Data ===
@@ -131,8 +129,7 @@ def execute_algorithm(file_input_dict: dict[str, pd.DataFrame], visualize: bool 
         "advice": list(zip(net_advice['Source'], net_advice['Target'])),
         "moretime": list(zip(net_moretime['Source'], net_moretime['Target'])),
         "influential": list(zip(net_influential['Source'], net_influential['Target'])),
-        "disrespect": list(zip(net_disrespect['Source'], net_disrespect['Target'])),
-        "feedback": list(zip(net_feedback['Source'], net_feedback['Target']))
+        "disrespect": list(zip(net_disrespect['Source'], net_disrespect['Target']))
     }
 
     # Now, build the dataset for training the model
@@ -153,8 +150,7 @@ def execute_algorithm(file_input_dict: dict[str, pd.DataFrame], visualize: bool 
 
     # === Step 0: Load predictor ===
     survey_predictor = joblib.load('survey_predictor.pkl')
-    X_train_columns = X_train.columns  # Ensure this is set before use
-    student_ids = survey_outcome.index.tolist() 
+    student_ids = survey_outcome.index.tolist()
 
     # === Step 1: Initial allocation using Current_Class from survey_outcome_raw ===
     initial_alloc_df = survey_outcome_raw[['Current_Class']].copy()
@@ -162,14 +158,18 @@ def execute_algorithm(file_input_dict: dict[str, pd.DataFrame], visualize: bool 
     initial_alloc_df.index = range(len(initial_alloc_df))
 
     # === Step 2: Initial multilabel link prediction using the trained model ===
+    
+    same_class_threshold = 0.50 #------------------------need tune
+    diff_class_threshold= 0.68 #---------------------need tune
+    
     relation_list = list(relation_to_label.keys())
     predicted_links = predict_multilabel_links_using_embeddings_and_classes(
         embeddings,
         multilabel_link_model,
         relation_list=relation_list,
         alloc_df=initial_alloc_df,
-        same_class_threshold=0.53,
-        diff_class_threshold=0.69
+        same_class_threshold=same_class_threshold,
+        diff_class_threshold=diff_class_threshold
     )
 
     # === Step 3: Enrich student data ===
@@ -191,8 +191,6 @@ def execute_algorithm(file_input_dict: dict[str, pd.DataFrame], visualize: bool 
             weight = 20000000
         elif relation == "moretime":
             weight = 1000
-        elif relation == "feedback":
-            weight = 1000
         elif relation == "influential":
             weight = 2000
         else:
@@ -203,7 +201,7 @@ def execute_algorithm(file_input_dict: dict[str, pd.DataFrame], visualize: bool 
     allocation_result = cpsat_wellbeing_and_ties_allocation(
         df_enriched_updated,
         n_classes=11,
-        enriched_links=dynamic_links
+        enriched_links=enriched_links
     )
 
     # map index - student_id
@@ -223,8 +221,8 @@ def execute_algorithm(file_input_dict: dict[str, pd.DataFrame], visualize: bool 
         model=multilabel_link_model,
         relation_list=relation_list,
         alloc_df=alloc_df,  # Updated allocation
-        same_class_threshold=0.53,
-        diff_class_threshold=0.69
+        same_class_threshold=same_class_threshold,
+        diff_class_threshold=diff_class_threshold
     )
 
     # Count links After re-threshold
@@ -336,7 +334,7 @@ def load_test_data(file_name):
     net_friends = pd.read_excel(file_name, sheet_name="net_0_Friends")
     net_disrespect = pd.read_excel(file_name, sheet_name="net_5_Disrespect")
     net_influential = pd.read_excel(file_name, sheet_name="net_1_Influential")
-    net_feedback = pd.read_excel(file_name, sheet_name="net_2_Feedback")
+    #net_feedback = pd.read_excel(file_name, sheet_name="net_2_Feedback")
     net_advice = pd.read_excel(file_name, sheet_name="net_4_Advice")
     net_moretime = pd.read_excel(file_name, sheet_name="net_3_MoreTime")
     net_affiliation = pd.read_excel(file_name, sheet_name="net_affiliation")
@@ -345,7 +343,7 @@ def load_test_data(file_name):
     output_dict["net_0_friends"] = net_friends
     output_dict["net_5_disrespect"] = net_disrespect
     output_dict["net_1_influential"] = net_influential
-    output_dict["net_2_feedback"] = net_feedback
+    #output_dict["net_2_feedback"] = net_feedback
     output_dict["net_4_advice"] = net_advice
     output_dict["net_3_moretime"] = net_moretime
     output_dict["net_affiliation"] = net_affiliation

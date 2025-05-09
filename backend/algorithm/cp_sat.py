@@ -15,25 +15,25 @@ def build_enriched_links(predicted_links_dict):
     friends_set = set(predicted_links_dict.get("friends", []))
     for u, v in friends_set:
         if (v, u) in friends_set:
-            enriched_links.append((u, v, "mutual_friend", 10))
+            enriched_links.append((u, v, "mutual_friend", 10000000))
         else:
-            enriched_links.append((u, v, "oneway_friend", 1))
+            enriched_links.append((u, v, "oneway_friend", 50000))
 
     for u, v in predicted_links_dict.get("advice", []):
-        enriched_links.append((u, v, "advice", 10))
+        enriched_links.append((u, v, "advice", 20000000))
         
     for u, v in predicted_links_dict.get("feedback", []):
         enriched_links.append((u, v, "feedback", 10))
 
     for u, v in predicted_links_dict.get("moretime", []):
-        enriched_links.append((u, v, "moretime", 1))
+        enriched_links.append((u, v, "moretime", 1000))
 
     for u, v in predicted_links_dict.get("influential", []):
-        enriched_links.append((u, v, "influential", 10))
+        enriched_links.append((u, v, "influential", 2000))
 
     for u, v in predicted_links_dict.get("disrespect", []):
-        enriched_links.append((u, v, "bully", -10))
-        enriched_links.append((v, u, "victim", 1))
+        enriched_links.append((u, v, "bully", -70000000))
+        enriched_links.append((v, u, "victim", -70000000))
 
     return enriched_links
 

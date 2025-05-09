@@ -38,12 +38,11 @@ def visualize_predicted_network_colored(predicted_links, alloc_df, title="Predic
 
     # Draw edges by type
     relation_colors = {
-        "friends": "green",
         "advice": "blue",
         "moretime": "purple",
         "influential": "orange",
         "disrespect": "red",
-        "feedback" : "yellow"
+        "friends": "green"
     }
 
     for relation, color in relation_colors.items():
