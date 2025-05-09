@@ -191,9 +191,13 @@ def cpsat_social_allocation(df, n_classes, enriched_links, wellbeing_weight=1, d
 
     model.Maximize(sum(objective_terms))
 
+    
     solver = cp_model.CpSolver()
-    solver.parameters.max_time_in_seconds = 40
+    solver.parameters.random_seed = 42
+    solver.parameters.linearization_level = 0
+    solver.parameters.max_time_in_seconds = 20 # --need tune
     solver.parameters.num_search_workers = 8
+    solver.parameters.num_search_workers = 1
     status = solver.Solve(model)
 
     allocation = []
@@ -263,10 +267,13 @@ def cpsat_academic_allocation(df, n_classes, enriched_links, wellbeing_weight=1,
             objective_terms.append(weight * same_class)
 
     model.Maximize(sum(objective_terms))
-
+    
     solver = cp_model.CpSolver()
-    solver.parameters.max_time_in_seconds = 40
+    solver.parameters.random_seed = 42
+    solver.parameters.linearization_level = 0
+    solver.parameters.max_time_in_seconds = 20 # --need tune
     solver.parameters.num_search_workers = 8
+    solver.parameters.num_search_workers = 1
     status = solver.Solve(model)
 
     allocation = []
@@ -337,9 +344,13 @@ def cpsat_mental_allocation(df, n_classes, enriched_links, wellbeing_weight=1, d
 
     model.Maximize(sum(objective_terms))
 
+    
     solver = cp_model.CpSolver()
-    solver.parameters.max_time_in_seconds = 40
+    solver.parameters.random_seed = 42
+    solver.parameters.linearization_level = 0
+    solver.parameters.max_time_in_seconds = 20 # --need tune
     solver.parameters.num_search_workers = 8
+    solver.parameters.num_search_workers = 1
     status = solver.Solve(model)
 
     allocation = []

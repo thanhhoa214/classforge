@@ -49,8 +49,7 @@ relationship_weights = {
     "advice": 3,
     "disrespect": -3,
     "moretime": 3,
-    "influential": 1.5,
-    "feedback" : 1.5
+    "influential": 1.5
 }
 
 net_dict = {
@@ -58,8 +57,7 @@ net_dict = {
     "advice": net_advice,
     "disrespect": net_disrespect,
     "moretime": net_moretime,
-    "influential": net_influential,
-    "feedback":net_feedback
+    "influential": net_influential
 }
 
 # === Step 1: Prepare Training Data ===
@@ -131,8 +129,7 @@ relation_dict = {
     "advice": list(zip(net_advice['Source'], net_advice['Target'])),
     "moretime": list(zip(net_moretime['Source'], net_moretime['Target'])),
     "influential": list(zip(net_influential['Source'], net_influential['Target'])),
-    "disrespect": list(zip(net_disrespect['Source'], net_disrespect['Target'])),
-    "feedback": list(zip(net_feedback['Source'], net_feedback['Target']))
+    "disrespect": list(zip(net_disrespect['Source'], net_disrespect['Target']))
 }
 
 # Now, build the dataset for training the model
@@ -168,8 +165,8 @@ predicted_links = predict_multilabel_links_using_embeddings_and_classes(
     multilabel_link_model,
     relation_list=relation_list,
     alloc_df=initial_alloc_df,
-    same_class_threshold=0.53,
-    diff_class_threshold=0.69
+    same_class_threshold=0.54,
+    diff_class_threshold=0.67
 )
 
 # === Step 3: Enrich student data ===
@@ -191,8 +188,6 @@ for u, v, relation, _ in enriched_links:
         weight = 20000000
     elif relation == "moretime":
         weight = 1000
-    elif relation == "feedback":
-        weight = 1000
     elif relation == "influential":
         weight = 2000
     else:
@@ -203,7 +198,7 @@ for u, v, relation, _ in enriched_links:
 allocation_result = cpsat_academic_allocation(
     df_enriched_updated,
     n_classes=11,
-    enriched_links=dynamic_links
+    enriched_links=enriched_links
 )
 
 # map index - student_id
@@ -223,8 +218,8 @@ predicted_links = apply_thresholds_from_classes(
     model=multilabel_link_model,
     relation_list=relation_list,
     alloc_df=alloc_df,  # Updated allocation
-    same_class_threshold=0.53,
-    diff_class_threshold=0.69
+    same_class_threshold=0.54,
+    diff_class_threshold=0.67
 )
 
 # Count links After re-threshold

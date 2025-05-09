@@ -159,8 +159,8 @@ def execute_algorithm(file_input_dict: dict[str, pd.DataFrame], visualize: bool 
 
     # === Step 2: Initial multilabel link prediction using the trained model ===
     
-    same_class_threshold = 0.50 #------------------------need tune
-    diff_class_threshold= 0.68 #---------------------need tune
+    same_class_threshold = 0.54 #------------------------need tune
+    diff_class_threshold= 0.67 #---------------------need tune
     
     relation_list = list(relation_to_label.keys())
     predicted_links = predict_multilabel_links_using_embeddings_and_classes(
@@ -177,25 +177,6 @@ def execute_algorithm(file_input_dict: dict[str, pd.DataFrame], visualize: bool 
 
     # === Step 4: Build enriched + weighted link tuples ===
     enriched_links = build_enriched_links(predicted_links)
-    dynamic_links = []
-    for u, v, relation, _ in enriched_links:
-        if relation == "mutual_friend":
-            weight = 10000000
-        elif relation == "oneway_friend":
-            weight = 50000
-        elif relation == "bully":
-            weight = -70000000
-        elif relation == "victim":
-            weight = -70000000
-        elif relation == "advice":
-            weight = 20000000
-        elif relation == "moretime":
-            weight = 1000
-        elif relation == "influential":
-            weight = 2000
-        else:
-            weight = 500
-        dynamic_links.append((u, v, relation, weight))
 
     # === Step 5: Run CP-SAT allocation ===
     allocation_result = cpsat_wellbeing_and_ties_allocation(
@@ -270,11 +251,6 @@ def execute_algorithm(file_input_dict: dict[str, pd.DataFrame], visualize: bool 
 
     df_final = X_post.copy()
     df_final = df_final.merge(predicted_wellbeing_df, left_index=True, right_index=True)
-
-    dynamic_links_named = [
-        (index_to_id[u], index_to_id[v], rel, weight)
-        for u, v, rel, weight in dynamic_links
-    ]
 
     df_SNA = df_final.merge(predicted_wellbeing_df, left_index=True, right_index=True)
     df_SNA = df_SNA.rename(columns={
