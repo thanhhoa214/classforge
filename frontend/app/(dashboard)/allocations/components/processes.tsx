@@ -17,11 +17,14 @@ export default function Processes() {
       });
     },
   });
-  console.log(data);
+  const sortedData = data?.sort(
+    (a, b) =>
+      new Date(b.created_at).getTime() - new Date(a.created_at).getTime()
+  );
 
   return (
     <ul className="flex flex-col gap-2">
-      {data?.map((processRun) => (
+      {sortedData?.map((processRun) => (
         <li key={processRun.id.low}>
           <TransitionLink
             href={`/students?rid=${processRun.id.low}`}

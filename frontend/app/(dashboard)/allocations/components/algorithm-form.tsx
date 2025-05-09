@@ -4,6 +4,7 @@ import { Button } from "@/components/ui/button";
 import { type AllocationResult } from "../types";
 import { toast } from "sonner";
 import { useState } from "react";
+import { ApiQueryClient } from "@/lib/api";
 
 interface AlgorithmFormProps {
   onResult: (result: AllocationResult) => void;
@@ -33,7 +34,15 @@ const priorityOptions = [
 
 export function AlgorithmForm({ onResult }: AlgorithmFormProps) {
   const [option, setOption] = useState(priorityOptions[0].value);
-
+  const { mutate: reallocate, isPending } = ApiQueryClient.useMutation(
+    "get",
+    "/run",
+    {
+      onSuccess: (data) => {
+        onResult(data);
+      },
+    }
+  );
   const onSubmit: React.FormEventHandler = async (e) => {
     e.preventDefault();
     try {

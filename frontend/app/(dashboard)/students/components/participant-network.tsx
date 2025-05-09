@@ -68,7 +68,7 @@ export default function ParticipantNetwork({
             )}
           </>
         ) : (
-          <div className="h-full flex flex-col gap-1 items-center justify-center bg-background/80 text-muted-foreground text-sm">
+          <div className="h-full flex flex-col gap-1 text-center items-center justify-center bg-background/80 text-muted-foreground text-sm">
             <MousePointer2Icon className="h-6 w-6" />
             <p>Select a participant to view their network.</p>
           </div>

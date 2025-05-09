@@ -1,36 +1,44 @@
+"use client";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Network, Users, GraduationCap, BarChart3 } from "lucide-react";
+import { Users, GraduationCap, BarChart3 } from "lucide-react";
 import Processes from "../allocations/components/processes";
 import NetworkOverview from "./NetworkOverview";
-
-const metrics = [
-  {
-    title: "Total Students",
-    value: "1,234",
-    icon: Users,
-    description: "Active students in the system",
-  },
-  {
-    title: "Network Density",
-    value: "73%",
-    icon: Network,
-    description: "Average connection density",
-  },
-  {
-    title: "Active Allocations",
-    value: "12",
-    icon: GraduationCap,
-    description: "Current classroom allocations",
-  },
-  {
-    title: "Performance Score",
-    value: "85%",
-    icon: BarChart3,
-    description: "Overall system performance",
-  },
-];
+import { FetchClient } from "@/lib/api";
+import { useQuery } from "@tanstack/react-query";
+import { formatNumber } from "@/lib/utils";
 
 export default function DashboardPage() {
+  const { data: participantCount } = useQuery({
+    queryKey: ["metrics", "participants"],
+    queryFn: () => FetchClient.GET("/metrics/participants"),
+  });
+
+  const { data: relationshipCount } = useQuery({
+    queryKey: ["metrics", "relationships"],
+    queryFn: () => FetchClient.GET("/metrics/relationships"),
+  });
+
+  const metrics = [
+    {
+      title: "Total Students",
+      value: formatNumber(participantCount?.data?.participant_count || 0),
+      icon: Users,
+      description: "Active students in the system",
+    },
+    {
+      title: "Active Allocations",
+      value: 4,
+      icon: GraduationCap,
+      description: "Current classroom allocations",
+    },
+    {
+      title: "Total Relationships",
+      value: formatNumber(relationshipCount?.data?.relationship_count || 0),
+      icon: BarChart3,
+      description: "Total relationships in the system",
+    },
+  ];
+
   return (
     <div>
       <div className="mb-8">
@@ -45,11 +53,11 @@ export default function DashboardPage() {
           const Icon = metric.icon;
           return (
             <Card key={metric.title}>
-              <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+              <CardHeader className="flex flex-row items-center justify-between space-y-0">
                 <CardTitle className="text-sm font-medium">
                   {metric.title}
                 </CardTitle>
-                <Icon className="h-4 w-4 text-muted-foreground" />
+                <Icon className="size-4.5 text-muted-foreground" />
               </CardHeader>
               <CardContent>
                 <div className="text-2xl font-bold">{metric.value}</div>
