@@ -1,32 +1,65 @@
-from fastapi import APIRouter, Depends
+from enum import Enum
+from fastapi import APIRouter, Depends, HTTPException
 from services.loader import get_loader
 from services.queue import queue
 from algofunction import run_algorithm
-
+from pydantic import BaseModel
 router = APIRouter()
 
-@router.get("/run")
-async def run():
-    try:
-        dl = get_loader()
-        
-        job_id = dl.get_last_process_run()
-        if job_id is None:
-            job_id = 0
-        else:
-            job_id += 1
-        job_id = str(job_id)
-        
-        # Check if the job is already in the queue or is runnign
-        if queue.fetch_job(job_id) and (queue.fetch_job(job_id).is_finished or queue.fetch_job(job_id).is_started):
-                return {"status": "Algorithm already run - job_id: " + job_id}
-    
-        queue.enqueue(run_algorithm, job_id=job_id)
 
+class OptionEnum(str, Enum):
+    balanced = "balanced"
+    academic = "academic"
+    mental   = "mental"
+    social   = "social"
+
+# run balance algorithm
+class RunAlgorithmRequest(BaseModel):
+    option: OptionEnum = OptionEnum.balanced
+    save_data: bool = True
+
+
+class RunAlgorithmResponse(BaseModel):
+    job_id: str
+    status: str
+
+@router.post("/run")
+async def run_algo(
+    req: RunAlgorithmRequest,
+    dl = Depends(get_loader)
+):
+    """
+    Run the algorithm with the given option and save data if specified.
+    There are 4 options: balanced, academic, mental, social.
+    The algorithm will be run in the background and a job ID will be returned.
+    use save_data to save the data to the database or not.
+    Use the job ID to check the status of the job.
+
+    """
+    try:
+        last = dl.get_last_process_run()
+        next_id = (last + 1) if last is not None else 0
+        job_id = str(next_id)
+
+        # don't re-enqueue if it's already queued or running
+        existing = queue.fetch_job(job_id)
+        if existing and (existing.is_started or existing.is_finished):
+            return {"status": f"Job already submitted", "job_id": job_id}
+
+        # enqueue your function, passing option & save_data
+        queue.enqueue(
+            run_algorithm,
+            req.option.value,
+            req.save_data,
+            job_id=job_id
+        )
         return {"job_id": job_id}
-    
+
     except Exception as e:
-        return {"status": "error", "message": str(e)}
+        raise HTTPException(status_code=500, detail=str(e))
+
+
+    
 
 @router.get("/job-status/{job_id}")
 def job_status(job_id: str):
