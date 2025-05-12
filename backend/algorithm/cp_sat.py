@@ -15,25 +15,25 @@ def build_enriched_links(predicted_links_dict):
     friends_set = set(predicted_links_dict.get("friends", []))
     for u, v in friends_set:
         if (v, u) in friends_set:
-            enriched_links.append((u, v, "mutual_friend", 10))
+            enriched_links.append((u, v, "mutual_friend", 10000000))
         else:
-            enriched_links.append((u, v, "oneway_friend", 1))
+            enriched_links.append((u, v, "oneway_friend", 50000))
 
     for u, v in predicted_links_dict.get("advice", []):
-        enriched_links.append((u, v, "advice", 10))
+        enriched_links.append((u, v, "advice", 20000000))
         
     for u, v in predicted_links_dict.get("feedback", []):
         enriched_links.append((u, v, "feedback", 10))
 
     for u, v in predicted_links_dict.get("moretime", []):
-        enriched_links.append((u, v, "moretime", 1))
+        enriched_links.append((u, v, "moretime", 1000))
 
     for u, v in predicted_links_dict.get("influential", []):
-        enriched_links.append((u, v, "influential", 10))
+        enriched_links.append((u, v, "influential", 2000))
 
     for u, v in predicted_links_dict.get("disrespect", []):
-        enriched_links.append((u, v, "bully", -10))
-        enriched_links.append((v, u, "victim", 1))
+        enriched_links.append((u, v, "bully", -70000000))
+        enriched_links.append((v, u, "victim", -70000000))
 
     return enriched_links
 
@@ -191,9 +191,13 @@ def cpsat_social_allocation(df, n_classes, enriched_links, wellbeing_weight=1, d
 
     model.Maximize(sum(objective_terms))
 
+    
     solver = cp_model.CpSolver()
-    solver.parameters.max_time_in_seconds = 40
+    solver.parameters.random_seed = 42
+    solver.parameters.linearization_level = 0
+    solver.parameters.max_time_in_seconds = 20 # --need tune
     solver.parameters.num_search_workers = 8
+    solver.parameters.num_search_workers = 1
     status = solver.Solve(model)
 
     allocation = []
@@ -263,10 +267,13 @@ def cpsat_academic_allocation(df, n_classes, enriched_links, wellbeing_weight=1,
             objective_terms.append(weight * same_class)
 
     model.Maximize(sum(objective_terms))
-
+    
     solver = cp_model.CpSolver()
-    solver.parameters.max_time_in_seconds = 40
+    solver.parameters.random_seed = 42
+    solver.parameters.linearization_level = 0
+    solver.parameters.max_time_in_seconds = 20 # --need tune
     solver.parameters.num_search_workers = 8
+    solver.parameters.num_search_workers = 1
     status = solver.Solve(model)
 
     allocation = []
@@ -337,9 +344,13 @@ def cpsat_mental_allocation(df, n_classes, enriched_links, wellbeing_weight=1, d
 
     model.Maximize(sum(objective_terms))
 
+    
     solver = cp_model.CpSolver()
-    solver.parameters.max_time_in_seconds = 40
+    solver.parameters.random_seed = 42
+    solver.parameters.linearization_level = 0
+    solver.parameters.max_time_in_seconds = 20 # --need tune
     solver.parameters.num_search_workers = 8
+    solver.parameters.num_search_workers = 1
     status = solver.Solve(model)
 
     allocation = []

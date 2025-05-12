@@ -52,8 +52,7 @@ def execute_mental_algorithm(file_input_dict: dict[str, pd.DataFrame], visualize
         "advice": 3,
         "disrespect": -3,
         "moretime": 3,
-        "influential": 1.5,
-        "feedback" : 1.5
+        "influential": 1.5
     }
 
     net_dict = {
@@ -61,8 +60,7 @@ def execute_mental_algorithm(file_input_dict: dict[str, pd.DataFrame], visualize
         "advice": net_advice,
         "disrespect": net_disrespect,
         "moretime": net_moretime,
-        "influential": net_influential,
-        "feedback":net_feedback
+        "influential": net_influential
     }
 
     # === Step 1: Prepare Training Data ===
@@ -134,8 +132,7 @@ def execute_mental_algorithm(file_input_dict: dict[str, pd.DataFrame], visualize
         "advice": list(zip(net_advice['Source'], net_advice['Target'])),
         "moretime": list(zip(net_moretime['Source'], net_moretime['Target'])),
         "influential": list(zip(net_influential['Source'], net_influential['Target'])),
-        "disrespect": list(zip(net_disrespect['Source'], net_disrespect['Target'])),
-        "feedback": list(zip(net_feedback['Source'], net_feedback['Target']))
+        "disrespect": list(zip(net_disrespect['Source'], net_disrespect['Target']))
     }
 
     # Now, build the dataset for training the model
@@ -180,33 +177,12 @@ def execute_mental_algorithm(file_input_dict: dict[str, pd.DataFrame], visualize
 
     # === Step 4: Build enriched + weighted link tuples ===
     enriched_links = build_enriched_links(predicted_links)
-    dynamic_links = []
-    for u, v, relation, _ in enriched_links:
-        if relation == "mutual_friend":
-            weight = 10000000
-        elif relation == "oneway_friend":
-            weight = 50000
-        elif relation == "bully":
-            weight = -70000000
-        elif relation == "victim":
-            weight = -70000000
-        elif relation == "advice":
-            weight = 20000000
-        elif relation == "moretime":
-            weight = 1000
-        elif relation == "feedback":
-            weight = 1000
-        elif relation == "influential":
-            weight = 2000
-        else:
-            weight = 500
-        dynamic_links.append((u, v, relation, weight))
 
     # === Step 5: Run CP-SAT allocation ===
     allocation_result = cpsat_mental_allocation(
         df_enriched_updated,
         n_classes=11,
-        enriched_links=dynamic_links
+        enriched_links=enriched_links
     )
 
     # map index - student_id
@@ -226,8 +202,8 @@ def execute_mental_algorithm(file_input_dict: dict[str, pd.DataFrame], visualize
         model=multilabel_link_model,
         relation_list=relation_list,
         alloc_df=alloc_df,  # Updated allocation
-        same_class_threshold=0.53,
-        diff_class_threshold=0.69
+        same_class_threshold=0.54,
+        diff_class_threshold=0.67
     )
 
     # Count links After re-threshold
@@ -281,10 +257,6 @@ def execute_mental_algorithm(file_input_dict: dict[str, pd.DataFrame], visualize
     df_final = X_post.copy()
     df_final = df_final.merge(predicted_wellbeing_df, left_index=True, right_index=True)
 
-    dynamic_links_named = [
-        (index_to_id[u], index_to_id[v], rel, weight)
-        for u, v, rel, weight in dynamic_links
-    ]
 
     df_SNA = df_final.merge(predicted_wellbeing_df, left_index=True, right_index=True)
     df_SNA = df_SNA.rename(columns={
