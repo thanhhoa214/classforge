@@ -1,295 +1,175 @@
 "use client";
-
-import { useState } from "react";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Progress } from "@/components/ui/progress";
+import { useEffect, useState } from "react";
+import { Card, CardContent, CardHeader } from "@/components/ui/card";
+import {
+  ProcessedStudent,
+  useStudentsApiFromProcessId,
+} from "@/hooks/useStudents";
 import {
   BarChart,
   Bar,
+  Radar,
+  RadarChart,
+  PolarGrid,
+  PolarAngleAxis,
+  PolarRadiusAxis,
   XAxis,
-  YAxis,
   Tooltip,
-  Legend,
   ResponsiveContainer,
+  Legend,
 } from "recharts";
+import { StudentDataTable } from "../../../students/components/student-data-table";
+import ParticipantNetwork from "../../../students/components/participant-network";
+import { formatNumber } from "@/lib/utils";
+import { startCase } from "lodash-es";
+import { Metric } from "@/lib/neo4j";
 
-interface MockResult {
-  classrooms: Array<{
-    id: string;
-    name: string;
-    students: Array<{
-      id: string;
-      name: string;
-      metrics: {
-        socialConnections: number;
-        academicPerformance: number;
-        behavioralMetrics: number;
-        learningStyle: number;
-        specialNeeds: number;
-      };
-    }>;
-  }>;
+export interface AllocationResult {
+  processId: number;
   metrics: {
-    socialBalance: number;
-    academicBalance: number;
-    constraintSatisfaction: number;
-    overallScore: number;
+    academic_score: number;
+    social_score: number;
+    mental_score: number;
   };
 }
 
-const mockResult: MockResult = {
-  classrooms: [
-    {
-      id: "class-1",
-      name: "Class A",
-      students: [
-        {
-          id: "student-1",
-          name: "Alice",
-          metrics: {
-            socialConnections: 0.9,
-            academicPerformance: 0.8,
-            behavioralMetrics: 0.85,
-            learningStyle: 0.8,
-            specialNeeds: 0.7,
-          },
-        },
-        {
-          id: "student-2",
-          name: "Bob",
-          metrics: {
-            socialConnections: 0.85,
-            academicPerformance: 0.75,
-            behavioralMetrics: 0.8,
-            learningStyle: 0.75,
-            specialNeeds: 0.65,
-          },
-        },
-        {
-          id: "student-3",
-          name: "Charlie",
-          metrics: {
-            socialConnections: 0.8,
-            academicPerformance: 0.7,
-            behavioralMetrics: 0.75,
-            learningStyle: 0.7,
-            specialNeeds: 0.6,
-          },
-        },
-      ],
-    },
-    {
-      id: "class-2",
-      name: "Class B",
-      students: [
-        {
-          id: "student-4",
-          name: "David",
-          metrics: {
-            socialConnections: 0.8,
-            academicPerformance: 0.7,
-            behavioralMetrics: 0.75,
-            learningStyle: 0.7,
-            specialNeeds: 0.6,
-          },
-        },
-        {
-          id: "student-5",
-          name: "Eve",
-          metrics: {
-            socialConnections: 0.75,
-            academicPerformance: 0.65,
-            behavioralMetrics: 0.7,
-            learningStyle: 0.65,
-            specialNeeds: 0.55,
-          },
-        },
-        {
-          id: "student-6",
-          name: "Frank",
-          metrics: {
-            socialConnections: 0.7,
-            academicPerformance: 0.6,
-            behavioralMetrics: 0.65,
-            learningStyle: 0.6,
-            specialNeeds: 0.5,
-          },
-        },
-      ],
-    },
-  ],
-  metrics: {
-    socialBalance: 0.85,
-    academicBalance: 0.78,
-    constraintSatisfaction: 0.95,
-    overallScore: 0.88,
-  },
+const RadarMetric = ({ student }: { student: ProcessedStudent }) => {
+  const data = [
+    { metric: "Academic", value: student.academicScore },
+    { metric: "Social", value: student.socialScore },
+    { metric: "Mental", value: student.mentalScore },
+  ];
+  return (
+    <RadarChart outerRadius={100} width={300} height={240} data={data}>
+      <PolarGrid />
+      <PolarAngleAxis dataKey="metric" />
+      <PolarRadiusAxis angle={30} domain={[0, 100]} />
+      <Radar
+        name="Scores"
+        dataKey="value"
+        stroke="#3b82f6"
+        fill="#3b82f6"
+        fillOpacity={0.6}
+      />
+    </RadarChart>
+  );
 };
 
-export function PreviewPanel() {
-  const displayRESULT = mockResult;
-  const [activeTab, setActiveTab] = useState<"analytics" | "info">("analytics");
-  const [currentPage, setCurrentPage] = useState(0);
-  const [viewMode] = useState<"start" | "end">("start");
+export default function PreviewPanel({ result }: { result: AllocationResult }) {
+  const { data: students } = useStudentsApiFromProcessId(result.processId);
+  const [selectedStudentId, setSelectedStudentId] = useState<string>();
 
-  if (!displayRESULT) {
-    return (
-      <Card>
-        <CardHeader>
-          <CardTitle>Preview</CardTitle>
-        </CardHeader>
-        <CardContent>
-          <p className="text-muted-foreground">
-            Generate an allocation to see the preview.
-          </p>
-        </CardContent>
-      </Card>
-    );
-  }
+  useEffect(() => {
+    if (students && students.length > 0 && !selectedStudentId) {
+      setSelectedStudentId(students[0].participantId + "");
+    }
+  }, [students, selectedStudentId]);
 
-  const students = displayRESULT.classrooms.flatMap(
-    (classroom) => classroom.students
+  const selectedStudent = students?.find(
+    (s) => s.participantId + "" === selectedStudentId
   );
-  const studentsToShow =
-    viewMode === "start"
-      ? students.slice(currentPage * 10, (currentPage + 1) * 10)
-      : students.slice(-10);
 
   return (
-    <Card>
-      <CardHeader>
-        <CardTitle>Allocation Preview</CardTitle>
-      </CardHeader>
-      <CardContent className="space-y-6">
-        <div className="tabs flex space-x-4 mb-4">
-          <button
-            className={`tab px-5 py-1 rounded-lg shadow-md transition-all cursor-pointer ${
-              activeTab === "analytics"
-                ? "bg-primary text-white shadow-lg"
-                : "bg-gray-100 hover:bg-gray-200"
-            }`}
-            onClick={() => setActiveTab("analytics")}
-          >
-            Analytics
-          </button>
-          <button
-            className={`tab px-3 py-2 rounded-lg shadow-md transition-all cursor-pointer ${
-              activeTab === "info"
-                ? "bg-primary text-white shadow-lg"
-                : "bg-gray-100 hover:bg-gray-200"
-            }`}
-            onClick={() => setActiveTab("info")}
-          >
-            Info
-          </button>
-        </div>
+    <div className="flex flex-col gap-4">
+      <Card>
+        <CardContent>
+          <ResponsiveContainer width="100%" height={200}>
+            <BarChart data={[result.metrics]}>
+              <XAxis dataKey="name" hide />
+              <Tooltip />
+              <Legend />
 
-        {activeTab === "analytics" && (
-          <div>
-            <h3 className="text-sm font-medium mb-2">Classrooms</h3>
-            <div className="space-y-2">
-              {displayRESULT.classrooms.map((classroom) => (
-                <div
-                  key={classroom.id}
-                  className="p-3 border rounded-lg bg-muted/50"
-                >
-                  <h4 className="font-medium">{classroom.name}</h4>
-                  <p className="text-sm text-muted-foreground">
-                    {classroom.students.length} students
-                  </p>
-                </div>
+              {Object.entries(result.metrics).map(([key]) => (
+                <Bar
+                  key={key}
+                  dataKey={key as keyof Metric}
+                  fill={
+                    key === "academic_score"
+                      ? "#10b981"
+                      : key === "social_score"
+                      ? "#f59e0b"
+                      : "#3b82f6"
+                  }
+                  name={startCase(key)}
+                  barSize={30}
+                />
               ))}
-            </div>
-            <h3 className="text-sm font-medium mb-2 mt-4">
-              Performance Metrics
-            </h3>
-            <div className="space-y-4">
-              <div>
-                <div className="flex justify-between text-sm mb-1">
-                  <span>Academic Balance</span>
-                  <span>
-                    {Math.round(displayRESULT.metrics.academicBalance * 100)}%
-                  </span>
-                </div>
-                <Progress value={displayRESULT.metrics.academicBalance * 100} />
-              </div>
-              <div>
-                <div className="flex justify-between text-sm mb-1">
-                  <span>Constraint Satisfaction</span>
-                  <span>
-                    {Math.round(
-                      displayRESULT.metrics.constraintSatisfaction * 100
-                    )}
-                    %
-                  </span>
-                </div>
-                <Progress
-                  value={displayRESULT.metrics.constraintSatisfaction * 100}
-                />
-              </div>
-              <div>
-                <div className="flex justify-between text-sm mb-1">
-                  <span>Overall Score</span>
-                  <span>
-                    {Math.round(displayRESULT.metrics.overallScore * 100)}%
-                  </span>
-                </div>
-                <Progress value={displayRESULT.metrics.overallScore * 100} />
-              </div>
-            </div>
-          </div>
-        )}
+            </BarChart>
+          </ResponsiveContainer>
 
-        {activeTab === "info" && (
-          <div>
-            <h3 className="text-sm font-medium mb-2">Student Metrics</h3>
-            <ResponsiveContainer width="100%" height={300}>
-              <BarChart data={studentsToShow}>
-                <XAxis dataKey="name" />
-                <YAxis />
-                <Tooltip />
-                <Legend />
-                <Bar
-                  dataKey="metrics.socialConnections"
-                  fill="#8884d8"
-                  name="Social Connections"
+          {students && (
+            <StudentDataTable
+              processId={result.processId}
+              className="flex-col mt-4"
+              onSelectedIdChange={(id) =>
+                setSelectedStudentId(id ? id + "" : undefined)
+              }
+            />
+          )}
+        </CardContent>
+      </Card>
+      {selectedStudent && (
+        <Card>
+          <CardHeader>
+            {students && students.length > 0 && (
+              <div className="mb-4">
+                <h2 className="text-xl font-semibold mb-4">
+                  {selectedStudent.name} (#{selectedStudent.participantId})
+                </h2>
+                <p className="text-muted-foreground">
+                  This student has been allocated to group{" "}
+                  {selectedStudent.house} with a score of{" "}
+                  {formatNumber(selectedStudent.academicScore)} in academics,{" "}
+                  {formatNumber(selectedStudent.socialScore)} in social
+                  interactions, and {formatNumber(selectedStudent.mentalScore)}{" "}
+                  in mental well-being.
+                </p>
+              </div>
+            )}
+          </CardHeader>
+          <CardContent>
+            <div className="flex gap-2">
+              <div className="flex flex-col gap-2">
+                <div className="flex justify-center items-end bg-white rounded-lg border grow min-w-80 aspect-square">
+                  <RadarMetric student={selectedStudent} />
+                </div>
+                <p className="text-center text-sm text-muted-foreground mt-1">
+                  Student Scores
+                </p>
+              </div>
+              <div>
+                <ParticipantNetwork
+                  participantIds={[selectedStudent.participantId]}
+                  showDetails={false}
+                  className="min-w-80 min-h-80"
                 />
-                <Bar
-                  dataKey="metrics.academicPerformance"
-                  fill="#82ca9d"
-                  name="Academic Performance"
-                />
-                <Bar
-                  dataKey="metrics.behavioralMetrics"
-                  fill="#ffc658"
-                  name="Behavioral Metrics"
-                />
-                <Bar
-                  dataKey="metrics.learningStyle"
-                  fill="#ff7300"
-                  name="Learning Style"
-                />
-              </BarChart>
-            </ResponsiveContainer>
-            <div className="flex justify-between mt-4">
-              <button
-                disabled={currentPage === 0}
-                onClick={() => setCurrentPage((prev) => prev - 1)}
-                className="px-4 py-2 bg-gray-200 rounded-md hover:bg-gray-300 disabled:opacity-50"
-              >
-                Previous
-              </button>
-              <button
-                disabled={(currentPage + 1) * 10 >= students.length}
-                onClick={() => setCurrentPage((prev) => prev + 1)}
-                className="px-4 py-2 bg-gray-200 rounded-md hover:bg-gray-300 disabled:opacity-50"
-              >
-                Next
-              </button>
+                <p className="text-center text-sm text-muted-foreground mt-1">
+                  Student Relationships
+                </p>
+              </div>
             </div>
-          </div>
-        )}
-      </CardContent>
-    </Card>
+
+            <h3 className="text-center text-lg font-semibold mt-4">
+              Detail Metrics
+            </h3>
+            <ul className="grid grid-cols-3 gap-x-8 w-full mt-2 border-2 rounded-lg p-2">
+              {Object.entries(selectedStudent.metrics).map(([key, value]) => (
+                <li
+                  key={key}
+                  className="flex justify-between items-center gap-1 text-muted-foreground"
+                >
+                  <span>{startCase(key)}:</span>
+                  <strong className="font-semibold">
+                    {formatNumber(
+                      typeof value === "number" ? value : value.low
+                    )}
+                  </strong>
+                </li>
+              ))}
+            </ul>
+          </CardContent>
+        </Card>
+      )}
+    </div>
   );
 }
