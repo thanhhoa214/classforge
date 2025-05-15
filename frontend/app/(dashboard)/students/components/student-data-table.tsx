@@ -124,7 +124,7 @@ export function StudentDataTable({
           <TableRow>
             <TableHead>Participant ID</TableHead>
             <TableHead>Name</TableHead>
-            <TableHead>House</TableHead>
+            <TableHead>Class</TableHead>
             <TableHead>
               Attendance{" "}
               <TooltipWrapInfo
@@ -176,7 +176,7 @@ export function StudentDataTable({
               >
                 <TableCell>{student.participantId}</TableCell>
                 <TableCell>{student.name}</TableCell>
-                <TableCell>{student.house}</TableCell>
+                <TableCell>{student.class}</TableCell>
                 <TableCell className="text-right">
                   {formatNumber(student.attendance)}
                 </TableCell>

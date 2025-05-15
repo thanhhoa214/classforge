@@ -36,6 +36,7 @@ export function useStudentsApiFromProcessId(processId?: number) {
           socialScore: metric.social_score,
           attendance: surveyData.attendance,
           performancePercentage: surveyData.perc_academic,
+          class: surveyData.current_class.low,
           disrespect: metric.disrespect_in_degree,
           friends: metric.friends_in_degree,
           metrics: metric,
