@@ -24,6 +24,7 @@ ClassForge is a full-stack platform for intelligent class allocation, student ne
 ---
 
 ## Tech Stack
+![Classforge](https://github.com/user-attachments/assets/01525a46-ef8b-4855-8cbf-1f8d3bf19426)
 
 - **Frontend:** Next.js (TypeScript, React 19, TailwindCSS, Radix UI, Zustand, Recharts, Sigma.js)
 - **Backend:** FastAPI, Python, Neo4j, Redis, RQ, LangChain, Uvicorn
@@ -90,6 +91,7 @@ npm run dev
 ---
 
 ## Sitemap
+![Screenshot 2025-05-16 at 3 52 53 PM](https://github.com/user-attachments/assets/f0272748-f74e-4de2-b187-b1e43bdca4b2)
 
 ```mermaid
 graph TD
