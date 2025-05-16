@@ -2,104 +2,94 @@
 
 import { useEffect, useState } from "react";
 
-import { AlgorithmForm } from "./components/algorithm-form";
-import PreviewPanel, { AllocationResult } from "./components/preview-panel";
-import { ChartColumnBig, TriangleAlert } from "lucide-react";
-import { useQuery } from "@tanstack/react-query";
-import { getMetric } from "@/app/actions/network";
-import { ApiQueryClient } from "@/lib/api";
+import CompareProcess from "../components/compare-process";
+import { useSortedProcesses } from "../components/processes";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import { useProcessId } from "@/hooks/useProcessId";
 
 export default function ComparePage() {
-  // Track two allocations for comparison
-  const [jobId, setJobId] = useState<number | undefined>();
-  const [prevResult, setPrevResult] = useState<AllocationResult | undefined>();
-  const [processId, setProcessId] = useState<number>();
+  const { processId } = useProcessId();
 
-  // Job status query
-  const { data: jobStatus, isLoading: isJobStatusLoading } = ApiQueryClient.useQuery(
-    "get",
-    "/job-status/{job_id}",
-    { params: { path: { job_id: jobId + "" } } },
-    {
-      enabled: !!jobId,
-      refetchInterval: (data) => {
-        if (data?.state.data?.status === "failed") return false;
-        return 5_000;
-      },
-    }
-  );
+  const [processId1, setProcessId1] = useState<number>(0);
+  const [processId2, setProcessId2] = useState<number>(0);
 
   useEffect(() => {
-    if (jobStatus?.status === "completed") setProcessId(jobStatus.result);
-  }, [jobStatus]);
+    setProcessId1(processId!);
+    setProcessId2(processId! - 1);
+  }, [processId]);
 
-  // Metric query
-  const { data: metric, isLoading: isMetricLoading } = useQuery({
-    queryKey: ["metric", processId],
-    queryFn: () => getMetric(processId!),
-    enabled: !!processId,
-  });
-
-  // Compose result
-  const result: AllocationResult | undefined =
-    processId && metric
-      ? {
-          processId,
-          metrics: {
-            academic_score: metric.academic_score,
-            social_score: metric.social_score,
-            mental_score: metric.mental_score,
-          },
-        }
-      : undefined;
-
-  // When a new allocation is generated, move the previous result to prevResult
-  const handleResult = (r: { job_id: number }) => {
-    if (result) setPrevResult(result);
-    setJobId(r.job_id);
-  };
-
-  const isLoading = isJobStatusLoading || isMetricLoading || jobStatus?.status === "processing";
+  const { data: processes } = useSortedProcesses();
 
   return (
-    <div>
+    <div className="pr-2">
       <div className="mb-8 text-center">
         <h1 className="text-2xl font-bold">Compare Allocations</h1>
         <p className="text-muted-foreground">
           Generate and compare two classroom allocations side by side.
         </p>
       </div>
-      <div className="w-4/5 max-w-5xl mx-auto mb-12">
-        <AlgorithmForm onResult={handleResult} isLoading={isLoading} />
-        {jobStatus?.status === "failed" && (
-          <p className="text-red-500 text-center mt-2 flex justify-center items-center gap-2">
-            <TriangleAlert size={20} /> Failed to generate allocation. Please try again.
-          </p>
-        )}
-      </div>
-      <div>
-        <h2 className="text-2xl font-bold mb-1 text-center">Allocation Comparison</h2>
-        {(result || prevResult) ? (
-          <p className="text-muted-foreground text-center text-sm">
-            {prevResult && result
-              ? "Here are your previous and current allocations side by side."
-              : "Here is the allocation result. Generate another to compare!"}
-          </p>
-        ) : (
-          <p className="text-muted-foreground text-center mt-4 p-16 border-2 border-dashed rounded-lg">
-            <ChartColumnBig size={40} className="mx-auto mb-2" />
-            The allocation result will be displayed here after you generate it.
-          </p>
-        )}
-        <div className="flex items-start gap-4 mt-4">
-          {prevResult && <div className="w-1/2"><PreviewPanel result={prevResult} /></div>}
-          {isLoading && (
-            <div className="w-1/2 flex items-center justify-center min-h-[300px] border-2 border-dashed rounded-lg text-center text-muted-foreground p-8">
-              Your Newly Generated Allocation Should be visible here soon...
-            </div>
-          )}
-          {!isLoading && result && <div className="w-1/2"><PreviewPanel result={result} /></div>}
+      <div className="mx-auto mb-4 grid grid-cols-2 gap-4 text-center">
+        <div>
+          <label htmlFor="processId1" className="font-semibold mb-1 block">
+            Process 1
+          </label>
+          <Select
+            value={processId1.toString()}
+            onValueChange={(value) => setProcessId1(parseInt(value))}
+          >
+            <SelectTrigger id="processId1" className="h-auto text-left">
+              <SelectValue placeholder="Process 1" />
+            </SelectTrigger>
+            <SelectContent>
+              {processes?.map((process) => (
+                <SelectItem
+                  key={process.id.low}
+                  value={process.id.low.toString()}
+                >
+                  <strong>Process #{process.id.low}</strong>
+                  <p className="text-muted-foreground text-ellipsis overflow-hidden">
+                    {process.description} •{" "}
+                    {new Date(process.created_at).toLocaleString()}
+                  </p>
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
         </div>
+        <div>
+          <label htmlFor="processId2" className="font-semibold mb-1 block">
+            Process 2
+          </label>
+          <Select
+            value={processId2.toString()}
+            onValueChange={(value) => setProcessId2(parseInt(value))}
+          >
+            <SelectTrigger id="processId2" className="h-auto text-left">
+              <SelectValue placeholder="Process 2" />
+            </SelectTrigger>
+            <SelectContent>
+              {processes?.map((process) => (
+                <SelectItem
+                  key={process.id.low}
+                  value={process.id.low.toString()}
+                >
+                  <strong>Process #{process.id.low}</strong>
+                  <p className="text-muted-foreground text-ellipsis overflow-hidden">
+                    {process.description} •{" "}
+                    {new Date(process.created_at).toLocaleDateString()}
+                  </p>
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+        </div>
+        <CompareProcess processId1={processId1} processId2={processId2} />
       </div>
     </div>
   );

@@ -1,14 +1,15 @@
 "use client";
 
 import { AlgorithmForm } from "./components/algorithm-form";
-import PreviewPanel, { AllocationResult } from "./components/preview-panel";
+import PreviewPanel, { useAllocationResult } from "./components/preview-panel";
 import { ChartColumnBig, TriangleAlert } from "lucide-react";
 import AiChat from "./components/ai-chat";
 import { ApiQueryClient } from "@/lib/api";
-import { useQuery } from "@tanstack/react-query";
-import { getMetric } from "@/app/actions/network";
 import { useEffect, useState } from "react";
 import { useLocalStorage } from "usehooks-ts";
+import ClassNetwork from "../students/components/class-network";
+import ClassIdSelect from "@/components/ui2/ClassIdSelect";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 
 export default function AllocationsPage() {
   const [jobId, setJobId] = useLocalStorage<number | undefined>(
@@ -24,34 +25,25 @@ export default function AllocationsPage() {
       {
         enabled: !!jobId,
         refetchInterval: (data) => {
-          if (data?.state.data?.status === "failed") return false;
+          if (data?.state.data?.status !== "processing") return false;
           return 5_000;
         },
       }
     );
 
   const [processId, setProcessId] = useState<number>();
+  const [classId, setClassId] = useState<number>();
+  const [chatId, setChatId] = useState<number>();
 
   useEffect(() => {
-    if (jobStatus?.status === "completed") setProcessId(jobStatus.result);
+    if (jobStatus?.status === "completed") {
+      setProcessId(jobStatus.result);
+      setChatId(Math.round(Math.random() * 1_000_000));
+    }
   }, [jobStatus]);
 
-  const { data: metric, isLoading: isMetricLoading } = useQuery({
-    queryKey: ["metric", processId],
-    queryFn: () => getMetric(processId!),
-    enabled: !!processId,
-  });
-  const result: AllocationResult | undefined =
-    processId && metric
-      ? {
-          processId,
-          metrics: {
-            academic_score: metric.academic_score,
-            social_score: metric.social_score,
-            mental_score: metric.mental_score,
-          },
-        }
-      : undefined;
+  const { data: result, isLoading: isMetricLoading } =
+    useAllocationResult(processId);
 
   const isLoading =
     isJobStatusLoading || isMetricLoading || jobStatus?.status === "processing";
@@ -95,13 +87,30 @@ export default function AllocationsPage() {
         <div className="flex items-start gap-4 mt-4">
           {result && (
             <>
-              <div className="w-3/4">
+              <div className="w-3/4 flex flex-col gap-4">
                 <PreviewPanel result={result} />
+
+                <Card>
+                  <CardHeader>
+                    <CardTitle>Class Network</CardTitle>
+                  </CardHeader>
+                  <CardContent>
+                    <ClassIdSelect
+                      processId={result.processId}
+                      classId={classId}
+                      onClassIdChange={setClassId}
+                    />
+                    <ClassNetwork classId={classId} className="w-full mt-2" />
+                  </CardContent>
+                </Card>
               </div>
-              <AiChat
-                processId={result.processId}
-                onProcessIdChange={setProcessId}
-              />
+              {chatId && (
+                <AiChat
+                  chatId={chatId}
+                  processId={result.processId}
+                  onProcessIdChange={setProcessId}
+                />
+              )}
             </>
           )}
         </div>

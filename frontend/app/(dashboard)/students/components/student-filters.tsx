@@ -9,9 +9,10 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { Button } from "@/components/ui/button";
+import ClassIdSelect from "@/components/ui2/ClassIdSelect";
 
 export interface StudentFiltersType {
-  house?: string;
+  classId?: string;
   performanceRange?: {
     min: number;
     max: number;
@@ -20,9 +21,11 @@ export interface StudentFiltersType {
 }
 
 export function StudentFilters({
+  processId,
   filters,
   onFiltersChange,
 }: {
+  processId?: number;
   filters: StudentFiltersType;
   onFiltersChange: (filters: StudentFiltersType) => void;
 }) {
@@ -31,17 +34,8 @@ export function StudentFilters({
     onFiltersChange(updatedFilters);
   };
 
-  const houses = [
-    "Redwood",
-    "Vanguard",
-    "Astral",
-    "Phoenix",
-    "Falcon",
-    "Griffin",
-  ];
-
   return (
-    <div className="flex gap-4 items-center">
+    <div className="flex gap-2 items-center">
       <div className="flex-1">
         <Input
           className="h-10"
@@ -50,21 +44,13 @@ export function StudentFilters({
           onChange={(e) => handleFilterChange({ search: e.target.value })}
         />
       </div>
-      <Select
-        value={filters.house}
-        onValueChange={(value) => handleFilterChange({ house: value })}
-      >
-        <SelectTrigger className="w-[180px]">
-          <SelectValue placeholder="House" />
-        </SelectTrigger>
-        <SelectContent>
-          {houses.map((house) => (
-            <SelectItem key={house} value={house}>
-              {house}
-            </SelectItem>
-          ))}
-        </SelectContent>
-      </Select>
+      <ClassIdSelect
+        processId={processId!}
+        classId={filters.classId ? parseInt(filters.classId) : undefined}
+        onClassIdChange={(classId) =>
+          handleFilterChange({ classId: classId.toString() })
+        }
+      />
       <Select
         value={
           filters.performanceRange
@@ -78,8 +64,8 @@ export function StudentFilters({
           });
         }}
       >
-        <SelectTrigger className="w-[180px]">
-          <SelectValue placeholder="Academic range" />
+        <SelectTrigger className="w-24">
+          <SelectValue placeholder="Score" />
         </SelectTrigger>
         <SelectContent>
           <SelectItem value="0-50">0-50%</SelectItem>

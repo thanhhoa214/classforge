@@ -21,6 +21,7 @@ import { useState } from "react";
 import ReactMarkdown from "react-markdown";
 import { getReallocationSuggestion } from "@/app/actions/openai";
 import { useLocalStorage } from "usehooks-ts";
+import Link from "next/link";
 
 interface ChatMessage {
   id: string;
@@ -80,15 +81,17 @@ function ChatBubble({ message }: ChatMessageProps) {
 }
 
 export default function AiChat({
+  chatId,
   processId,
   onProcessIdChange,
 }: {
+  chatId: number;
   processId: number;
   onProcessIdChange: (processId: number) => void;
 }) {
   const [showTips, setShowTips] = useState(false);
   const [messages, setMessages] = useLocalStorage<ChatMessage[]>(
-    `ai-chat-messages-${processId}`,
+    `ai-chat-messages-${chatId}`,
     mockMessages,
     { initializeWithValue: false }
   );
@@ -192,9 +195,18 @@ export default function AiChat({
             )}
           </Button>
         </form>
-        <p className="text-xs text-muted-foreground mt-1">
-          <Info size={14} className="inline-block mb-px" /> Changes from AI bot
-          will automatically apply to your left preview.
+        <p className="text-xs text-muted-foreground mt-1 flex items-start gap-1">
+          <Info size={14} className="inline-block shrink-0 mt-0.5" />
+          <span>
+            Changes from AI bot will automatically apply to your left preview.
+            You can check your changes history at{" "}
+            <Link
+              href={"/allocations/compare"}
+              className="text-primary underline underline-offset-2"
+            >
+              Review & compare previous allocations
+            </Link>
+          </span>
         </p>
 
         <h3 className="font-semibold text-sm text-center mt-6">

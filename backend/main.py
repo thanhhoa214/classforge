@@ -24,7 +24,8 @@ app.include_router(chat.router)
 # Add CORS middleware here
 
 origins = [
-    "http://localhost:3000"
+    "http://localhost:3000",
+    "http://localhost:3001",
 ]
 
 app.add_middleware(

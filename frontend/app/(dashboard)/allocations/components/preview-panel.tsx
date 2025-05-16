@@ -23,6 +23,8 @@ import ParticipantNetwork from "../../students/components/participant-network";
 import { formatNumber } from "@/lib/utils";
 import { startCase } from "lodash-es";
 import { Metric } from "@/lib/neo4j";
+import { getMetric } from "@/app/actions/network";
+import { useQuery } from "@tanstack/react-query";
 
 export interface AllocationResult {
   processId: number;
@@ -69,6 +71,7 @@ export default function PreviewPanel({ result }: { result: AllocationResult }) {
     (s) => s.participantId + "" === selectedStudentId
   );
 
+  if (!result.metrics) return null;
   return (
     <div className="flex flex-col gap-4">
       <Card>
@@ -76,7 +79,7 @@ export default function PreviewPanel({ result }: { result: AllocationResult }) {
           <ResponsiveContainer width="100%" height={200}>
             <BarChart data={[result.metrics]}>
               <XAxis dataKey="name" hide />
-              <Tooltip />
+              <Tooltip formatter={(value) => formatNumber(value as number)} />
               <Legend />
 
               {Object.entries(result.metrics).map(([key]) => (
@@ -173,3 +176,19 @@ export default function PreviewPanel({ result }: { result: AllocationResult }) {
     </div>
   );
 }
+
+export const useAllocationResult: (processId?: number) => {
+  data?: AllocationResult;
+  isLoading: boolean;
+} = (processId) => {
+  const { data: metrics, isLoading } = useQuery({
+    queryKey: ["allocation-result", processId],
+    queryFn: () => getMetric(processId!),
+    enabled: !!processId,
+  });
+
+  return {
+    data: processId && metrics ? { processId, metrics } : undefined,
+    isLoading: isLoading,
+  };
+};

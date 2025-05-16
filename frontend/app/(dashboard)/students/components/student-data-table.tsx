@@ -43,12 +43,8 @@ export function StudentDataTable({
   const students = useMemo(() => {
     return (
       data?.filter((student) => {
-        if (
-          filters.house &&
-          student.house.toLowerCase() !== filters.house.toLowerCase()
-        ) {
+        if (filters.classId && student.class !== Number(filters.classId))
           return false;
-        }
 
         if (filters.performanceRange) {
           const performance = Number(student.academicScore) ?? 0;
@@ -117,7 +113,11 @@ export function StudentDataTable({
 
   return (
     <div className={cn("space-y-4 grow", className)}>
-      <StudentFilters filters={filters} onFiltersChange={setFilters} />
+      <StudentFilters
+        processId={processId}
+        filters={filters}
+        onFiltersChange={setFilters}
+      />
 
       <Table>
         <TableHeader>

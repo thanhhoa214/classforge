@@ -5,7 +5,8 @@ import { toast } from "sonner";
 import { useState } from "react";
 import { ApiQueryClient } from "@/lib/api";
 import { components, paths } from "@/lib/api/swagger";
-import { Loader2 } from "lucide-react";
+import { ArrowRight, Loader2 } from "lucide-react";
+import Link from "next/link";
 
 interface AlgorithmFormProps {
   isLoading: boolean;
@@ -104,24 +105,41 @@ export function AlgorithmForm({ onResult, isLoading }: AlgorithmFormProps) {
         ))}
       </div>
 
-      <Button
-        type="submit"
-        size={"lg"}
-        className="text-base mb-2"
-        disabled={isPending || isLoading}
-      >
-        {isPending || isLoading ? (
-          <>
-            <Loader2 className="animate-spin" /> Generating...
-          </>
-        ) : (
-          "Generate Allocation"
-        )}
-      </Button>
-      <p className="text-muted-foreground text-sm">
-        It may take minutes to generate the allocation. Please do not refresh
-        the page.
-      </p>
+      <div className="flex flex-col items-center justify-center">
+        <Button
+          type="submit"
+          size={"lg"}
+          className="text-base mb-2"
+          disabled={isPending || isLoading}
+        >
+          {isPending || isLoading ? (
+            <>
+              <Loader2 className="animate-spin" /> Generating...
+            </>
+          ) : (
+            "Generate Allocation"
+          )}
+        </Button>
+
+        {isPending ||
+          (isLoading && (
+            <p className="text-muted-foreground text-sm mb-4">
+              It may take minutes to generate the allocation.
+            </p>
+          ))}
+
+        <Button
+          variant={"link"}
+          size={"lg"}
+          className="text-base underline"
+          type="button"
+          asChild
+        >
+          <Link href={"/allocations/compare"}>
+            Review & compare previous allocations <ArrowRight />
+          </Link>
+        </Button>
+      </div>
     </form>
   );
 }

@@ -5,8 +5,8 @@ import { ArrowUpRightFromSquareIcon } from "lucide-react";
 import { startCase } from "lodash-es";
 import { TransitionLink } from "@/components/ui2/TransitionLink";
 
-export default function Processes() {
-  const { data } = useQuery({
+export function useSortedProcesses() {
+  const { data, ...rest } = useQuery({
     queryKey: ["processes"],
     queryFn: async () => {
       const query = `MATCH (pr:ProcessRun) ORDER BY pr.run_id DESC RETURN pr`;
@@ -21,9 +21,14 @@ export default function Processes() {
     (a, b) =>
       new Date(b.created_at).getTime() - new Date(a.created_at).getTime()
   );
+  return { data: sortedData, ...rest };
+}
+
+export default function Processes() {
+  const { data: sortedData } = useSortedProcesses();
 
   return (
-    <ul className="flex flex-col gap-2">
+    <ul className="flex flex-col gap-2 max-h-96 overflow-y-auto">
       {sortedData?.map((processRun) => (
         <li key={processRun.id.low}>
           <TransitionLink
