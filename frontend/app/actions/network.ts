@@ -165,7 +165,7 @@ MATCH (pr)-[:computed_metric]->(m:Metric)-[:has_metric]->(p1)
 MATCH (pr)-[:computed_data]->(sd2:SurveyData)-[:has_data]->(p2:Participant)
   WHERE sd2.current_class = sd1.current_class
     AND p2 <> p1
-MATCH (p1) -[r]-> (p2)
+OPTIONAL MATCH (p1) -[r]-> (p2)
 WHERE r.run_id = ${processId}
 
 RETURN DISTINCT
@@ -175,7 +175,7 @@ RETURN DISTINCT
   r,
   p2,
   sd1.current_class AS class
-LIMIT 100;`;
+`;
   const result = await neo4jDriver.executeQuery(query);
   const nodes: NetworkNode[] = [];
   const edges: NetworkEdge[] = [];
@@ -183,10 +183,7 @@ LIMIT 100;`;
   for (const record of result.records) {
     const node1 = record.get("p1") as ParticipantNode;
     const node2 = record.get("p2") as ParticipantNode;
-    const relationship = record.get("r") as RelationshipNode;
-
-    const type = relationship.type;
-    const color = NODE_COLORS[type];
+    const relationship = record.get("r") as RelationshipNode | null;
     const participantColor = "#111111";
 
     // Check if nodes already exist to avoid duplicates
@@ -212,14 +209,17 @@ LIMIT 100;`;
       });
     }
 
+    if (!relationship) continue;
+    const type = relationship.type;
+    const color = NODE_COLORS[type];
     // Create edges
     edges.push({
       id: relationship.elementId,
       source: node1.properties.participant_id.low,
       target: node2.properties.participant_id.low,
       size: 1,
-      color: `${color}`,
-      type: type,
+      color,
+      type,
     });
   }
 
